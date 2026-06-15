@@ -10,6 +10,7 @@ import { BattleArena } from '@/components/BattleArena';
 import { submitScore } from '@/app/actions/leaderboard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { SiteNav } from '@/components/SiteNav';
 
 const PLAYER_MOVE_NAMES = ['water-gun', 'ember', 'vine-whip', 'thunderbolt'];
 const OPP_MOVE_NAMES = ['tackle', 'scratch', 'bite', 'gust'];
@@ -45,15 +46,24 @@ export default function BattlePage() {
 
   if (roster.length < 3) {
     return (
-      <main className="p-8">
-        <p>You need at least 3 Pokémon in your roster.</p>
-        <Button className="mt-3" onClick={() => router.push('/')}>
-          Go pick some
-        </Button>
-      </main>
+      <>
+        <SiteNav />
+        <main className="p-8">
+          <p>You need at least 3 Pokémon in your roster.</p>
+          <Button className="mt-3" onClick={() => router.push('/')}>
+            Go pick some
+          </Button>
+        </main>
+      </>
     );
   }
-  if (!opponents.length) return <main className="p-8">Summoning opponents…</main>;
+  if (!opponents.length)
+    return (
+      <>
+        <SiteNav />
+        <main className="p-8">Summoning opponents…</main>
+      </>
+    );
 
   async function onOver(result: {
     score: number;
@@ -83,25 +93,28 @@ export default function BattlePage() {
   }
 
   return (
-    <main className="max-w-5xl mx-auto p-6">
-      <header className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">Battle</h1>
-        <Input
-          placeholder="Your name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          maxLength={24}
-          className="max-w-[200px]"
-          disabled={busy}
+    <>
+      <SiteNav />
+      <main className="max-w-5xl mx-auto p-6">
+        <header className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-semibold">Battle</h1>
+          <Input
+            placeholder="Your name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            maxLength={24}
+            className="max-w-[200px]"
+            disabled={busy}
+          />
+        </header>
+        <BattleArena
+          team={roster.slice(0, 3)}
+          opponents={opponents}
+          playerMoves={playerMoves}
+          opponentMoves={oppMoves}
+          onOver={onOver}
         />
-      </header>
-      <BattleArena
-        team={roster.slice(0, 3)}
-        opponents={opponents}
-        playerMoves={playerMoves}
-        opponentMoves={oppMoves}
-        onOver={onOver}
-      />
-    </main>
+      </main>
+    </>
   );
 }
