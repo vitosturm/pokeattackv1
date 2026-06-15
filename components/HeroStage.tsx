@@ -1,6 +1,9 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
+import { useRouter } from 'next/navigation';
+import { animatedSpriteUrl, spriteUrl } from '@/lib/pokeapi';
+import { padId } from '@/lib/utils';
 
 const subscribeNoop = () => () => {};
 function useIsClient(): boolean {
@@ -10,9 +13,6 @@ function useIsClient(): boolean {
     () => false,
   );
 }
-import { useRouter } from 'next/navigation';
-import { animatedSpriteUrl, spriteUrl } from '@/lib/pokeapi';
-import { padId } from '@/lib/utils';
 
 const POKEMON = [
   { id: 1, name: 'bulbasaur', type: 'grass' },
