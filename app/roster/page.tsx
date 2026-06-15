@@ -14,7 +14,9 @@ export default function RosterPage() {
       <header className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold">My Roster ({roster.length}/6)</h1>
         <div className="flex gap-2">
-          <Button variant="ghost" onClick={clear} disabled={!roster.length}>Clear</Button>
+          <Button variant="ghost" onClick={clear} disabled={!roster.length}>
+            Clear
+          </Button>
           <Button onClick={() => router.push('/battle')} disabled={roster.length < 3}>
             Start battle
           </Button>
@@ -27,7 +29,12 @@ export default function RosterPage() {
           {roster.map((p) => (
             <div key={p.id} className="relative">
               <PokemonCard pokemon={p} />
-              <Button size="sm" variant="ghost" onClick={() => remove(p.id)} className="absolute top-2 right-2">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => remove(p.id)}
+                className="absolute top-2 right-2"
+              >
                 Remove
               </Button>
             </div>

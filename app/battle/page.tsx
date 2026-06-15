@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 const PLAYER_MOVE_NAMES = ['water-gun', 'ember', 'vine-whip', 'thunderbolt'];
-const OPP_MOVE_NAMES    = ['tackle', 'scratch', 'bite', 'gust'];
+const OPP_MOVE_NAMES = ['tackle', 'scratch', 'bite', 'gust'];
 
 export default function BattlePage() {
   const router = useRouter();
@@ -38,22 +38,34 @@ export default function BattlePage() {
       setOppMoves(om);
     }
     init().catch(() => toast.error("Couldn't load opponents — refresh to retry."));
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (roster.length < 3) {
     return (
       <main className="p-8">
         <p>You need at least 3 Pokémon in your roster.</p>
-        <Button className="mt-3" onClick={() => router.push('/')}>Go pick some</Button>
+        <Button className="mt-3" onClick={() => router.push('/')}>
+          Go pick some
+        </Button>
       </main>
     );
   }
   if (!opponents.length) return <main className="p-8">Summoning opponents…</main>;
 
-  async function onOver(result: { score: number; wins: number; battles: number; winner: 'player' | 'opponent' }) {
+  async function onOver(result: {
+    score: number;
+    wins: number;
+    battles: number;
+    winner: 'player' | 'opponent';
+  }) {
     const trimmed = name.trim();
-    if (!trimmed) { toast('Enter a name to save your score.'); return; }
+    if (!trimmed) {
+      toast('Enter a name to save your score.');
+      return;
+    }
     setBusy(true);
     const { winner: _w, ...payload } = result;
     const res = await submitScore({ playerName: trimmed, ...payload });
@@ -62,7 +74,10 @@ export default function BattlePage() {
       toast.success('Score saved!');
       router.push('/leaderboard');
     } else {
-      localStorage.setItem('pokeattack:pending-score', JSON.stringify({ playerName: trimmed, ...payload }));
+      localStorage.setItem(
+        'pokeattack:pending-score',
+        JSON.stringify({ playerName: trimmed, ...payload }),
+      );
       toast.error("Couldn't save your score — kept locally.");
     }
   }

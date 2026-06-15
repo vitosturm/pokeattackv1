@@ -4,9 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { SubmitScoreInputSchema, type SubmitScoreInput } from '@/lib/types';
 
-export type SubmitResult =
-  | { ok: true; id: string }
-  | { ok: false; error: 'invalid' | 'db' };
+export type SubmitResult = { ok: true; id: string } | { ok: false; error: 'invalid' | 'db' };
 
 export async function submitScore(input: SubmitScoreInput): Promise<SubmitResult> {
   const parsed = SubmitScoreInputSchema.safeParse(input);

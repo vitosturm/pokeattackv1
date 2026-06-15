@@ -3,13 +3,20 @@ import { battleReducer, initBattleState } from '@/hooks/useBattle';
 import type { PokemonSummary, Move } from '@/lib/types';
 
 const mk = (id: number, name: string, type: 'fire' | 'water' | 'grass'): PokemonSummary => ({
-  id, name, types: [type],
+  id,
+  name,
+  types: [type],
   stats: { hp: 100, attack: 80, defense: 70, specialAttack: 80, specialDefense: 70, speed: 60 },
   sprite: 'x',
 });
 
 const move = (type: 'fire' | 'water' | 'grass', power = 80): Move => ({
-  id: 1, name: 'm', type, power, pp: 20, damageClass: 'special',
+  id: 1,
+  name: 'm',
+  type,
+  power,
+  pp: 20,
+  damageClass: 'special',
 });
 
 const team = [mk(1, 'a', 'fire'), mk(2, 'b', 'water'), mk(3, 'c', 'grass')];
@@ -26,7 +33,13 @@ describe('battleReducer', () => {
 
   it('applies damage on PLAYER_MOVE', () => {
     let s = initBattleState({ team, opponents: opp });
-    s = battleReducer(s, { type: 'PLAYER_MOVE', move: move('fire'), rand: () => 1, oppRand: () => 1, oppMove: move('grass') });
+    s = battleReducer(s, {
+      type: 'PLAYER_MOVE',
+      move: move('fire'),
+      rand: () => 1,
+      oppRand: () => 1,
+      oppMove: move('grass'),
+    });
     expect(s.opponent.hp[0]).toBeLessThan(100);
     expect(s.player.hp[0]).toBeLessThan(100);
   });
@@ -34,7 +47,13 @@ describe('battleReducer', () => {
   it('auto-switches when active Pokémon faints', () => {
     let s = initBattleState({ team, opponents: opp });
     s = { ...s, opponent: { ...s.opponent, hp: [0, 100, 100] } };
-    s = battleReducer(s, { type: 'PLAYER_MOVE', move: move('fire'), rand: () => 1, oppRand: () => 1, oppMove: move('grass') });
+    s = battleReducer(s, {
+      type: 'PLAYER_MOVE',
+      move: move('fire'),
+      rand: () => 1,
+      oppRand: () => 1,
+      oppMove: move('grass'),
+    });
     expect(s.opponent.active).toBe(1);
   });
 

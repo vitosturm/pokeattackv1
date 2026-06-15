@@ -51,7 +51,13 @@ function nextAlive(side: Side): number {
   return -1;
 }
 
-function applyHit(attacker: PokemonSummary, defender: PokemonSummary, move: Move, defenderHp: number, rand?: () => number): number {
+function applyHit(
+  attacker: PokemonSummary,
+  defender: PokemonSummary,
+  move: Move,
+  defenderHp: number,
+  rand?: () => number,
+): number {
   if (move.damageClass === 'status') return defenderHp;
   const dmg = computeDamage(
     { level: 50, types: attacker.types, stats: attacker.stats },
@@ -76,7 +82,13 @@ export function battleReducer(state: BattleState, action: BattleAction): BattleS
     oppHpAfter[oIdx] = applyHit(playerMon, oppMon, action.move, oppHpAfter[oIdx], action.rand);
 
     const playerHpAfter = state.player.hp.slice();
-    playerHpAfter[pIdx] = applyHit(oppMon, playerMon, action.oppMove, playerHpAfter[pIdx], action.oppRand);
+    playerHpAfter[pIdx] = applyHit(
+      oppMon,
+      playerMon,
+      action.oppMove,
+      playerHpAfter[pIdx],
+      action.oppRand,
+    );
 
     let opponent = { ...state.opponent, hp: oppHpAfter };
     let player = { ...state.player, hp: playerHpAfter };

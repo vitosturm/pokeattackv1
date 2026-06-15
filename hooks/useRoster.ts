@@ -41,11 +41,16 @@ function getSnapshot(): PokemonSummary[] {
   if (cache === null || listeners.size === 0) cache = read();
   return cache;
 }
-function refresh() { cache = read(); }
+function refresh() {
+  cache = read();
+}
 
 if (typeof window !== 'undefined') {
   window.addEventListener('storage', (e) => {
-    if (e.key === ROSTER_KEY) { refresh(); emit(); }
+    if (e.key === ROSTER_KEY) {
+      refresh();
+      emit();
+    }
   });
 }
 
@@ -57,12 +62,14 @@ export function useRoster() {
     if (current.some((x) => x.id === p.id)) return;
     if (current.length >= MAX_ROSTER) return;
     const next = [...current, p];
-    write(next); refresh();
+    write(next);
+    refresh();
   }, []);
 
   const remove = useCallback((id: number) => {
     const next = read().filter((x) => x.id !== id);
-    write(next); refresh();
+    write(next);
+    refresh();
   }, []);
 
   const reorder = useCallback((from: number, to: number) => {
@@ -71,10 +78,14 @@ export function useRoster() {
     const next = current.slice();
     const [m] = next.splice(from, 1);
     next.splice(to, 0, m);
-    write(next); refresh();
+    write(next);
+    refresh();
   }, []);
 
-  const clear = useCallback(() => { write([]); refresh(); }, []);
+  const clear = useCallback(() => {
+    write([]);
+    refresh();
+  }, []);
 
   return { roster, add, remove, reorder, clear };
 }

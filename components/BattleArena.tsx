@@ -13,7 +13,12 @@ interface Props {
   opponents: PokemonSummary[];
   playerMoves: Move[];
   opponentMoves: Move[];
-  onOver?: (result: { score: number; wins: number; battles: number; winner: 'player' | 'opponent' }) => void;
+  onOver?: (result: {
+    score: number;
+    wins: number;
+    battles: number;
+    winner: 'player' | 'opponent';
+  }) => void;
 }
 
 export function BattleArena({ team, opponents, playerMoves, opponentMoves, onOver }: Props) {
@@ -34,7 +39,12 @@ export function BattleArena({ team, opponents, playerMoves, opponentMoves, onOve
 
   useEffect(() => {
     if (state.over && onOver && state.winner) {
-      onOver({ score: state.score, wins: state.wins, battles: state.battles, winner: state.winner });
+      onOver({
+        score: state.score,
+        wins: state.wins,
+        battles: state.battles,
+        winner: state.winner,
+      });
     }
   }, [state.over, state.winner, state.score, state.wins, state.battles, onOver]);
 
@@ -55,7 +65,11 @@ export function BattleArena({ team, opponents, playerMoves, opponentMoves, onOve
         <p className="text-xs text-white/60 mb-1">You</p>
         <h2 className="capitalize">{playerMon.name}</h2>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={playerMon.sprite} alt={playerMon.name} className="w-40 h-40 object-contain mx-auto" />
+        <img
+          src={playerMon.sprite}
+          alt={playerMon.name}
+          className="w-40 h-40 object-contain mx-auto"
+        />
         <HpBar current={state.player.hp[state.player.active]} max={playerMon.stats.hp} />
 
         <div className="grid grid-cols-2 gap-2 mt-4">

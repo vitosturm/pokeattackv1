@@ -16,7 +16,9 @@ export function HpBar({ current, max }: { current: number; max: number }) {
           transition={{ duration: 0.4, ease: 'easeOut' }}
         />
       </div>
-      <div className="text-[10px] mt-1 font-mono text-white/70">{current} / {max}</div>
+      <div className="text-[10px] mt-1 font-mono text-white/70">
+        {current} / {max}
+      </div>
     </div>
   );
 }

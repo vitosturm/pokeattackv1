@@ -25,7 +25,11 @@ export const MoveSchema = z.object({
   id: z.number().int(),
   name: z.string(),
   type: TypeSchema,
-  power: z.number().int().nullable().transform((v) => v ?? 0),
+  power: z
+    .number()
+    .int()
+    .nullable()
+    .transform((v) => v ?? 0),
   pp: z.number().int().nonnegative(),
   damageClass: z.enum(['physical', 'special', 'status']),
 });
@@ -41,10 +45,12 @@ export const LeaderboardEntrySchema = z.object({
 });
 export type LeaderboardEntry = z.infer<typeof LeaderboardEntrySchema>;
 
-export const SubmitScoreInputSchema = z.object({
-  playerName: z.string().min(1).max(24),
-  score: z.number().int().nonnegative().max(1_000_000),
-  wins: z.number().int().nonnegative().max(10_000),
-  battles: z.number().int().positive().max(10_000),
-}).refine((v) => v.wins <= v.battles, { message: 'wins cannot exceed battles' });
+export const SubmitScoreInputSchema = z
+  .object({
+    playerName: z.string().min(1).max(24),
+    score: z.number().int().nonnegative().max(1_000_000),
+    wins: z.number().int().nonnegative().max(10_000),
+    battles: z.number().int().positive().max(10_000),
+  })
+  .refine((v) => v.wins <= v.battles, { message: 'wins cannot exceed battles' });
 export type SubmitScoreInput = z.infer<typeof SubmitScoreInputSchema>;

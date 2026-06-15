@@ -194,8 +194,10 @@ export function HeroStage() {
               <span>Mission · Vol.01 — 2026</span>
             </div>
             <h2>
-              Train.<br />
-              Battle.<br />
+              Train.
+              <br />
+              Battle.
+              <br />
               <em>Conquer.</em>
             </h2>
             <p>Build a team of three. Master 18 types. Climb the board.</p>
@@ -238,8 +240,10 @@ export function HeroStage() {
               <span className="dot-status red" />
             </div>
             <h2>
-              151<br />
-              Pokémon.<br />
+              151
+              <br />
+              Pokémon.
+              <br />
               <em>Endless</em>
               <br />
               battles.
@@ -288,7 +292,11 @@ export function HeroStage() {
           --text: #e8e8ee;
           --muted: #8a8a99;
           --border: rgba(255, 255, 255, 0.08);
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+          font-family:
+            'Inter',
+            -apple-system,
+            BlinkMacSystemFont,
+            sans-serif;
           color: var(--text);
           -webkit-font-smoothing: antialiased;
           cursor: none;
@@ -1278,31 +1286,13 @@ export function HeroStage() {
           animation: burst 700ms ease-out forwards;
         }
         .burst.b1 {
-          background: radial-gradient(
-            circle,
-            #fff 0%,
-            #ffd14a 30%,
-            #ff5a30 60%,
-            transparent 80%
-          );
+          background: radial-gradient(circle, #fff 0%, #ffd14a 30%, #ff5a30 60%, transparent 80%);
         }
         .burst.b2 {
-          background: radial-gradient(
-            circle,
-            #fff 0%,
-            #5af0ff 30%,
-            #0a8fb8 60%,
-            transparent 80%
-          );
+          background: radial-gradient(circle, #fff 0%, #5af0ff 30%, #0a8fb8 60%, transparent 80%);
         }
         .burst.b3 {
-          background: radial-gradient(
-            circle,
-            #fff 0%,
-            #c060ff 30%,
-            #5a0aa8 60%,
-            transparent 80%
-          );
+          background: radial-gradient(circle, #fff 0%, #c060ff 30%, #5a0aa8 60%, transparent 80%);
         }
 
         @keyframes spark {

@@ -4,7 +4,9 @@ import { PokemonCard } from '@/components/PokemonCard';
 import { StatRadar } from '@/components/StatRadar';
 import { TypeBadge } from '@/components/TypeBadge';
 
-interface Params { id: string }
+interface Params {
+  id: string;
+}
 
 export default async function Page({ params }: { params: Promise<Params> }) {
   const { id } = await params;
@@ -19,7 +21,9 @@ export default async function Page({ params }: { params: Promise<Params> }) {
       <section>
         <h1 className="text-3xl capitalize mb-2">{p.name}</h1>
         <div className="flex gap-2 mb-4">
-          {p.types.map((t) => <TypeBadge key={t} type={t} />)}
+          {p.types.map((t) => (
+            <TypeBadge key={t} type={t} />
+          ))}
         </div>
         <StatRadar pokemon={p} />
       </section>

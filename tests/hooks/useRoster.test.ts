@@ -4,7 +4,9 @@ import { useRoster, ROSTER_KEY, MAX_ROSTER } from '@/hooks/useRoster';
 import type { PokemonSummary } from '@/lib/types';
 
 const sample = (id: number): PokemonSummary => ({
-  id, name: `p${id}`, types: ['normal'],
+  id,
+  name: `p${id}`,
+  types: ['normal'],
   stats: { hp: 1, attack: 1, defense: 1, specialAttack: 1, specialDefense: 1, speed: 1 },
   sprite: 'x',
 });
@@ -25,7 +27,10 @@ describe('useRoster', () => {
 
   it('does not add duplicates', () => {
     const { result } = renderHook(() => useRoster());
-    act(() => { result.current.add(sample(1)); result.current.add(sample(1)); });
+    act(() => {
+      result.current.add(sample(1));
+      result.current.add(sample(1));
+    });
     expect(result.current.roster).toHaveLength(1);
   });
 
@@ -39,7 +44,10 @@ describe('useRoster', () => {
 
   it('removes a Pokémon', () => {
     const { result } = renderHook(() => useRoster());
-    act(() => { result.current.add(sample(1)); result.current.add(sample(2)); });
+    act(() => {
+      result.current.add(sample(1));
+      result.current.add(sample(2));
+    });
     act(() => result.current.remove(1));
     expect(result.current.roster.map((p) => p.id)).toEqual([2]);
   });

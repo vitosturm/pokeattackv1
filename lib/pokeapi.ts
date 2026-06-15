@@ -3,7 +3,10 @@ import { MoveSchema, PokemonSummarySchema, type Move, type PokemonSummary } from
 const BASE = 'https://pokeapi.co/api/v2';
 
 export class PokeApiError extends Error {
-  constructor(message: string, public status?: number) {
+  constructor(
+    message: string,
+    public status?: number,
+  ) {
     super(message);
   }
 }
@@ -26,8 +29,13 @@ export function cryUrl(id: number): string {
   return `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${id}.ogg`;
 }
 
-interface RawStat { base_stat: number; stat: { name: string } }
-interface RawType { type: { name: string } }
+interface RawStat {
+  base_stat: number;
+  stat: { name: string };
+}
+interface RawType {
+  type: { name: string };
+}
 interface RawPokemon {
   id: number;
   name: string;
@@ -36,12 +44,12 @@ interface RawPokemon {
 }
 
 const STAT_MAP: Record<string, keyof PokemonSummary['stats']> = {
-  'hp': 'hp',
-  'attack': 'attack',
-  'defense': 'defense',
+  hp: 'hp',
+  attack: 'attack',
+  defense: 'defense',
   'special-attack': 'specialAttack',
   'special-defense': 'specialDefense',
-  'speed': 'speed',
+  speed: 'speed',
 };
 
 export async function getPokemon(id: number): Promise<PokemonSummary> {
