@@ -89,6 +89,74 @@ export async function getMove(idOrName: number | string): Promise<Move> {
   });
 }
 
+interface RawPokemonMoveEntry {
+  move: { name: string; url: string };
+  version_group_details: Array<{
+    level_learned_at: number;
+    move_learn_method: { name: string };
+    version_group: { name: string };
+  }>;
+}
+
+interface RawPokemonWithMoves extends RawPokemon {
+  moves: RawPokemonMoveEntry[];
+}
+
+export async function getPokemonWithMoves(
+  id: number,
+): Promise<{ pokemon: PokemonSummary; moves: Move[] }> {
+  const raw = await getJson<RawPokemonWithMoves>(`${BASE}/pokemon/${id}`);
+
+  const stats = { hp: 0, attack: 0, defense: 0, specialAttack: 0, specialDefense: 0, speed: 0 };
+  for (const s of raw.stats) {
+    const k = STAT_MAP[s.stat.name];
+    if (k) stats[k] = s.base_stat;
+  }
+  const pokemon = PokemonSummarySchema.parse({
+    id: raw.id,
+    name: raw.name,
+    types: raw.types.map((t) => t.type.name),
+    stats,
+    sprite: spriteUrl(raw.id),
+  });
+
+  const candidates = raw.moves
+    .filter((m) =>
+      m.version_group_details.some(
+        (d) => d.move_learn_method.name === 'level-up' && d.version_group.name === 'red-blue',
+      ),
+    )
+    .slice(0, 12)
+    .map((m) => m.move.name);
+
+  const moves: Move[] = [];
+  for (const name of candidates) {
+    if (moves.length >= 4) break;
+    try {
+      const move = await getMove(name);
+      if (move.damageClass !== 'status' && move.power > 0) moves.push(move);
+    } catch {
+      // skip moves that fail to load
+    }
+  }
+
+  if (moves.length < 4) {
+    const fallbacks = ['tackle', 'scratch', 'bite', 'quick-attack'];
+    for (const name of fallbacks) {
+      if (moves.length >= 4) break;
+      if (moves.some((m) => m.name === name)) continue;
+      try {
+        const move = await getMove(name);
+        if (move.damageClass !== 'status' && move.power > 0) moves.push(move);
+      } catch {
+        // skip
+      }
+    }
+  }
+
+  return { pokemon, moves: moves.slice(0, 4) };
+}
+
 export const GEN1_IDS = Array.from({ length: 151 }, (_, i) => i + 1);
 
 export function randomGen1Ids(count: number): number[] {

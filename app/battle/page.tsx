@@ -1,69 +1,91 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useRoster } from '@/hooks/useRoster';
-import { getMove, getPokemon, randomGen1Ids } from '@/lib/pokeapi';
+import { getPokemonWithMoves, randomGen1Ids } from '@/lib/pokeapi';
 import type { Move, PokemonSummary } from '@/lib/types';
 import { BattleArena } from '@/components/BattleArena';
+import { PokemonCard } from '@/components/PokemonCard';
 import { submitScore } from '@/app/actions/leaderboard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { SiteNav } from '@/components/SiteNav';
 
-const PLAYER_MOVE_NAMES = ['water-gun', 'ember', 'vine-whip', 'thunderbolt'];
-const OPP_MOVE_NAMES = ['tackle', 'scratch', 'bite', 'gust'];
+type Phase = 'pick' | 'loading' | 'fight' | 'over';
+
+interface LoadedBundle {
+  team: PokemonSummary[];
+  opponents: PokemonSummary[];
+  playerMoves: Record<number, Move[]>;
+  oppMoves: Record<number, Move[]>;
+}
 
 export default function BattlePage() {
   const router = useRouter();
   const { roster } = useRoster();
-  const [opponents, setOpponents] = useState<PokemonSummary[]>([]);
-  const [playerMoves, setPlayerMoves] = useState<Move[]>([]);
-  const [oppMoves, setOppMoves] = useState<Move[]>([]);
+  const [phase, setPhase] = useState<Phase>('pick');
+  const [picked, setPicked] = useState<Set<number>>(new Set());
+  const [bundle, setBundle] = useState<LoadedBundle | null>(null);
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    async function init() {
-      const ids = randomGen1Ids(3);
-      const [opps, pm, om] = await Promise.all([
-        Promise.all(ids.map(getPokemon)),
-        Promise.all(PLAYER_MOVE_NAMES.map(getMove)),
-        Promise.all(OPP_MOVE_NAMES.map(getMove)),
-      ]);
-      if (cancelled) return;
-      setOpponents(opps);
-      setPlayerMoves(pm);
-      setOppMoves(om);
-    }
-    init().catch(() => toast.error("Couldn't load opponents — refresh to retry."));
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const [lastResult, setLastResult] = useState<{
+    score: number;
+    wins: number;
+    battles: number;
+    winner: 'player' | 'opponent';
+  } | null>(null);
 
   if (roster.length < 3) {
     return (
       <>
         <SiteNav />
-        <main className="p-8">
+        <main className="p-8 max-w-2xl mx-auto">
           <p>You need at least 3 Pokémon in your roster.</p>
-          <Button className="mt-3" onClick={() => router.push('/')}>
+          <Button className="mt-3" onClick={() => router.push('/pokedex')}>
             Go pick some
           </Button>
         </main>
       </>
     );
   }
-  if (!opponents.length)
-    return (
-      <>
-        <SiteNav />
-        <main className="p-8">Summoning opponents…</main>
-      </>
-    );
+
+  function togglePick(id: number) {
+    setPicked((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else if (next.size < 3) next.add(id);
+      return next;
+    });
+  }
+
+  async function startBattle() {
+    if (picked.size !== 3) return;
+    const team = roster.filter((p) => picked.has(p.id));
+    setPhase('loading');
+    try {
+      const ids = randomGen1Ids(3);
+      const [teamLoaded, oppLoaded] = await Promise.all([
+        Promise.all(team.map((p) => getPokemonWithMoves(p.id))),
+        Promise.all(ids.map((id) => getPokemonWithMoves(id))),
+      ]);
+      const playerMoves: Record<number, Move[]> = {};
+      const oppMoves: Record<number, Move[]> = {};
+      for (const { pokemon, moves } of teamLoaded) playerMoves[pokemon.id] = moves;
+      for (const { pokemon, moves } of oppLoaded) oppMoves[pokemon.id] = moves;
+      setBundle({
+        team: teamLoaded.map((t) => t.pokemon),
+        opponents: oppLoaded.map((t) => t.pokemon),
+        playerMoves,
+        oppMoves,
+      });
+      setPhase('fight');
+    } catch {
+      toast.error("Couldn't load battle data. Try again.");
+      setPhase('pick');
+    }
+  }
 
   async function onOver(result: {
     score: number;
@@ -71,18 +93,20 @@ export default function BattlePage() {
     battles: number;
     winner: 'player' | 'opponent';
   }) {
+    setLastResult(result);
+    setPhase('over');
     const trimmed = name.trim();
     if (!trimmed) {
-      toast('Enter a name to save your score.');
+      toast('Enter a name above to save your score.');
       return;
     }
     setBusy(true);
     const { winner: _w, ...payload } = result;
+    void _w;
     const res = await submitScore({ playerName: trimmed, ...payload });
     setBusy(false);
     if (res.ok) {
       toast.success('Score saved!');
-      router.push('/leaderboard');
     } else {
       localStorage.setItem(
         'pokeattack:pending-score',
@@ -92,6 +116,13 @@ export default function BattlePage() {
     }
   }
 
+  function rematch() {
+    setPicked(new Set());
+    setBundle(null);
+    setLastResult(null);
+    setPhase('pick');
+  }
+
   return (
     <>
       <SiteNav />
@@ -99,21 +130,89 @@ export default function BattlePage() {
         <header className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-semibold">Battle</h1>
           <Input
-            placeholder="Your name"
+            placeholder="Your name (for leaderboard)"
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={24}
-            className="max-w-[200px]"
+            className="max-w-[260px]"
             disabled={busy}
           />
         </header>
-        <BattleArena
-          team={roster.slice(0, 3)}
-          opponents={opponents}
-          playerMoves={playerMoves}
-          opponentMoves={oppMoves}
-          onOver={onOver}
-        />
+
+        {phase === 'pick' && (
+          <section>
+            <p className="mb-4 text-white/70">
+              Choose 3 starters from your roster ({picked.size}/3 selected):
+            </p>
+            <div className="grid gap-4 grid-cols-2 md:grid-cols-3">
+              {roster.map((p) => {
+                const on = picked.has(p.id);
+                return (
+                  <div
+                    key={p.id}
+                    onClick={() => togglePick(p.id)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') togglePick(p.id);
+                    }}
+                    className={`relative cursor-pointer transition ${
+                      on ? 'ring-2 ring-[#ff3860] rounded-lg' : 'opacity-80 hover:opacity-100'
+                    }`}
+                  >
+                    <PokemonCard pokemon={p} />
+                    {on && (
+                      <span className="absolute top-2 right-2 bg-[#ff3860] text-white text-xs px-2 py-0.5 rounded-full">
+                        Picked
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-6 flex justify-end">
+              <Button onClick={startBattle} disabled={picked.size !== 3}>
+                Start battle →
+              </Button>
+            </div>
+          </section>
+        )}
+
+        {phase === 'loading' && (
+          <p className="text-center text-white/70 py-12">Summoning opponents…</p>
+        )}
+
+        {phase === 'fight' && bundle && (
+          <BattleArena
+            team={bundle.team}
+            opponents={bundle.opponents}
+            playerMoves={bundle.playerMoves}
+            opponentMoves={bundle.oppMoves}
+            onOver={onOver}
+          />
+        )}
+
+        {phase === 'over' && lastResult && (
+          <section className="grid gap-6 md:grid-cols-2">
+            <div className="text-center md:col-span-2 p-4">
+              <p className="text-3xl font-bold">
+                {lastResult.winner === 'player' ? 'Victory!' : 'Defeated.'}
+              </p>
+              <p className="text-sm text-white/60 mt-2">
+                Score: {lastResult.score} · Wins: {lastResult.wins} · Battles: {lastResult.battles}
+              </p>
+            </div>
+            <div className="md:col-span-2 flex justify-center gap-3">
+              <Button onClick={rematch}>Rematch</Button>
+              <Button variant="ghost" onClick={() => router.push('/leaderboard')}>
+                Leaderboard
+              </Button>
+              <Button variant="ghost" onClick={() => router.push('/')}>
+                Home
+              </Button>
+            </div>
+          </section>
+        )}
       </main>
     </>
   );

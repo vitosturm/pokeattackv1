@@ -7,12 +7,13 @@ import { HpBar } from './HpBar';
 import { MoveButton } from './MoveButton';
 import { TypeParticles } from './TypeParticles';
 import { ConfettiOnWin } from './ConfettiOnWin';
+import { Button } from '@/components/ui/button';
 
 interface Props {
   team: PokemonSummary[];
   opponents: PokemonSummary[];
-  playerMoves: Move[];
-  opponentMoves: Move[];
+  playerMoves: Record<number, Move[]>;
+  opponentMoves: Record<number, Move[]>;
   onOver?: (result: {
     score: number;
     wins: number;
@@ -25,16 +26,28 @@ export function BattleArena({ team, opponents, playerMoves, opponentMoves, onOve
   const [state, dispatch] = useBattle({ team, opponents });
   const [particles, setParticles] = useState(0);
   const [particleType, setParticleType] = useState<Move['type']>('normal');
+  const [showSwitch, setShowSwitch] = useState(false);
 
   const playerMon = state.player.team[state.player.active];
   const oppMon = state.opponent.team[state.opponent.active];
 
+  const myMoves = playerMoves[playerMon.id] ?? [];
+
   function play(move: Move) {
     if (state.over) return;
-    const oppMove = opponentMoves[Math.floor(Math.random() * opponentMoves.length)];
+    const oppMoveList = opponentMoves[oppMon.id] ?? [];
+    if (oppMoveList.length === 0) return;
+    const oppMove = oppMoveList[Math.floor(Math.random() * oppMoveList.length)];
     dispatch({ type: 'PLAYER_MOVE', move, oppMove });
     setParticleType(move.type);
     setParticles((n) => n + 1);
+  }
+
+  function switchTo(idx: number) {
+    if (idx === state.player.active) return;
+    if (state.player.hp[idx] === 0) return;
+    dispatch({ type: 'PLAYER_SWITCH', to: idx });
+    setShowSwitch(false);
   }
 
   useEffect(() => {
@@ -48,6 +61,10 @@ export function BattleArena({ team, opponents, playerMoves, opponentMoves, onOve
     }
   }, [state.over, state.winner, state.score, state.wins, state.battles, onOver]);
 
+  const switchableCount = state.player.team.filter(
+    (_, i) => i !== state.player.active && state.player.hp[i] > 0,
+  ).length;
+
   return (
     <section className="grid gap-6 md:grid-cols-2 relative">
       <ConfettiOnWin trigger={state.over && state.winner === 'player'} />
@@ -59,6 +76,15 @@ export function BattleArena({ team, opponents, playerMoves, opponentMoves, onOve
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={oppMon.sprite} alt={oppMon.name} className="w-40 h-40 object-contain mx-auto" />
         <HpBar current={state.opponent.hp[state.opponent.active]} max={oppMon.stats.hp} />
+        <div className="mt-3 flex gap-1 justify-center">
+          {state.opponent.team.map((p, i) => (
+            <span
+              key={p.id}
+              className={`h-2 w-6 rounded-full ${state.opponent.hp[i] === 0 ? 'bg-white/10' : 'bg-[#ff3860]/70'}`}
+              title={`${p.name} (${state.opponent.hp[i]}/${p.stats.hp})`}
+            />
+          ))}
+        </div>
       </div>
 
       <div className="bg-[#14141f] p-4 rounded-lg border border-white/10">
@@ -71,12 +97,69 @@ export function BattleArena({ team, opponents, playerMoves, opponentMoves, onOve
           className="w-40 h-40 object-contain mx-auto"
         />
         <HpBar current={state.player.hp[state.player.active]} max={playerMon.stats.hp} />
-
-        <div className="grid grid-cols-2 gap-2 mt-4">
-          {playerMoves.slice(0, 4).map((m) => (
-            <MoveButton key={m.id} move={m} disabled={state.over} onSelect={play} />
+        <div className="mt-3 flex gap-1 justify-center">
+          {state.player.team.map((p, i) => (
+            <span
+              key={p.id}
+              className={`h-2 w-6 rounded-full ${state.player.hp[i] === 0 ? 'bg-white/10' : i === state.player.active ? 'bg-green-500' : 'bg-green-500/40'}`}
+              title={`${p.name} (${state.player.hp[i]}/${p.stats.hp})`}
+            />
           ))}
         </div>
+
+        {!showSwitch && (
+          <div className="grid grid-cols-2 gap-2 mt-4">
+            {myMoves.slice(0, 4).map((m) => (
+              <MoveButton key={m.id} move={m} disabled={state.over} onSelect={play} />
+            ))}
+            {switchableCount > 0 && (
+              <Button
+                variant="ghost"
+                onClick={() => setShowSwitch(true)}
+                className="col-span-2"
+                disabled={state.over}
+              >
+                Switch Pokémon ⇆
+              </Button>
+            )}
+          </div>
+        )}
+
+        {showSwitch && (
+          <div className="mt-4">
+            <p className="text-sm text-white/60 mb-2">Pick a Pokémon to switch in:</p>
+            <div className="grid grid-cols-3 gap-2">
+              {state.player.team.map((p, i) => {
+                const isActive = i === state.player.active;
+                const fainted = state.player.hp[i] === 0;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => switchTo(i)}
+                    disabled={isActive || fainted}
+                    className={`p-2 rounded border ${
+                      isActive
+                        ? 'bg-white/10 border-white/20'
+                        : fainted
+                          ? 'opacity-40 border-white/5'
+                          : 'border-white/15 hover:bg-white/5'
+                    }`}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={p.sprite} alt={p.name} className="w-16 h-16 object-contain mx-auto" />
+                    <p className="text-xs capitalize">{p.name}</p>
+                    <p className="text-[10px] text-white/60">
+                      {state.player.hp[i]}/{p.stats.hp}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+            <Button variant="ghost" onClick={() => setShowSwitch(false)} className="mt-2 w-full">
+              Cancel
+            </Button>
+          </div>
+        )}
       </div>
 
       {state.over && (

@@ -44,6 +44,7 @@ export function initBattleState(init: Init): BattleState {
 
 export type BattleAction =
   | { type: 'PLAYER_MOVE'; move: Move; oppMove: Move; rand?: () => number; oppRand?: () => number }
+  | { type: 'PLAYER_SWITCH'; to: number }
   | { type: 'CHECK_OVER' };
 
 function nextAlive(side: Side): number {
@@ -70,6 +71,16 @@ function applyHit(
 
 export function battleReducer(state: BattleState, action: BattleAction): BattleState {
   if (state.over) return state;
+
+  if (action.type === 'PLAYER_SWITCH') {
+    if (action.to < 0 || action.to >= state.player.team.length) return state;
+    if (state.player.hp[action.to] === 0) return state;
+    if (action.to === state.player.active) return state;
+    return {
+      ...state,
+      player: { ...state.player, active: action.to },
+    };
+  }
 
   if (action.type === 'PLAYER_MOVE') {
     const pIdx = state.player.active;

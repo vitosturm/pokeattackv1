@@ -22,10 +22,18 @@ const oppMoves: Move[] = [
   { id: 9, name: 'burn', type: 'fire', power: 70, pp: 10, damageClass: 'special' },
 ];
 
+const playerMovesById: Record<number, Move[]> = { 1: moves, 2: moves, 3: moves };
+const oppMovesById: Record<number, Move[]> = { 4: oppMoves, 5: oppMoves, 6: oppMoves };
+
 describe('BattleArena', () => {
   it('renders both active Pokémon and four moves', () => {
     render(
-      <BattleArena team={team} opponents={opp} playerMoves={moves} opponentMoves={oppMoves} />,
+      <BattleArena
+        team={team}
+        opponents={opp}
+        playerMoves={playerMovesById}
+        opponentMoves={oppMovesById}
+      />,
     );
     expect(screen.getByText(/pa/)).toBeInTheDocument();
     expect(screen.getByText(/oa/)).toBeInTheDocument();
@@ -34,7 +42,12 @@ describe('BattleArena', () => {
 
   it('reduces opponent HP when a move is clicked', async () => {
     render(
-      <BattleArena team={team} opponents={opp} playerMoves={moves} opponentMoves={oppMoves} />,
+      <BattleArena
+        team={team}
+        opponents={opp}
+        playerMoves={playerMovesById}
+        opponentMoves={oppMovesById}
+      />,
     );
     const initialOppHp = screen.getAllByText('100 / 100');
     await userEvent.click(screen.getByRole('button', { name: /splash/i }));
