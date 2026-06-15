@@ -1,6 +1,15 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
+
+const subscribeNoop = () => () => {};
+function useIsClient(): boolean {
+  return useSyncExternalStore(
+    subscribeNoop,
+    () => true,
+    () => false,
+  );
+}
 import { useRouter } from 'next/navigation';
 import { animatedSpriteUrl, spriteUrl } from '@/lib/pokeapi';
 import { padId } from '@/lib/utils';
@@ -38,6 +47,8 @@ const POKEMON = [
   { id: 146, name: 'moltres', type: 'fire' },
 ] as const;
 
+type Picked = (typeof POKEMON)[number];
+
 function shuffle<T>(arr: readonly T[]): T[] {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
@@ -52,8 +63,21 @@ export function HeroStage() {
   const bounceRef = useRef<HTMLDivElement | null>(null);
   const centerRef = useRef<HTMLDivElement | null>(null);
 
-  const cardPicks = useMemo(() => shuffle(POKEMON).slice(0, 28), []);
-  const tickerPicks = useMemo(() => shuffle(POKEMON).slice(0, 10), []);
+  const isClient = useIsClient();
+  const cardPicks = useMemo<Picked[]>(
+    () =>
+      isClient
+        ? (shuffle(POKEMON).slice(0, 28) as Picked[])
+        : (POKEMON.slice(0, 28) as unknown as Picked[]),
+    [isClient],
+  );
+  const tickerPicks = useMemo<Picked[]>(
+    () =>
+      isClient
+        ? (shuffle(POKEMON).slice(0, 10) as Picked[])
+        : (POKEMON.slice(0, 10) as unknown as Picked[]),
+    [isClient],
+  );
 
   useEffect(() => {
     const layer = bounceRef.current;

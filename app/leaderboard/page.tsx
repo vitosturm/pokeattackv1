@@ -1,5 +1,7 @@
 import { getTopScores } from '@/app/actions/leaderboard';
 
+export const dynamic = 'force-dynamic';
+
 export default async function LeaderboardPage() {
   const rows = await getTopScores(50);
   return (
