@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { PokemonSummary, Move } from '@/lib/types';
 import { useBattle } from '@/hooks/useBattle';
+import { useSound } from '@/hooks/useSound';
+import { cryUrl } from '@/lib/pokeapi';
 import { HpBar } from './HpBar';
 import { MoveButton } from './MoveButton';
 import { TypeParticles } from './TypeParticles';
@@ -27,6 +29,9 @@ export function BattleArena({ team, opponents, playerMoves, opponentMoves, onOve
   const [particles, setParticles] = useState(0);
   const [particleType, setParticleType] = useState<Move['type']>('normal');
   const [showSwitch, setShowSwitch] = useState(false);
+  const playCry = useSound();
+  const prevOppActiveRef = useRef(0);
+  const prevPlayerActiveRef = useRef(0);
 
   const playerMon = state.player.team[state.player.active];
   const oppMon = state.opponent.team[state.opponent.active];
@@ -41,6 +46,7 @@ export function BattleArena({ team, opponents, playerMoves, opponentMoves, onOve
     dispatch({ type: 'PLAYER_MOVE', move, oppMove });
     setParticleType(move.type);
     setParticles((n) => n + 1);
+    playCry(cryUrl(oppMon.id));
   }
 
   function switchTo(idx: number) {
@@ -60,6 +66,20 @@ export function BattleArena({ team, opponents, playerMoves, opponentMoves, onOve
       });
     }
   }, [state.over, state.winner, state.score, state.wins, state.battles, onOver]);
+
+  useEffect(() => {
+    if (prevPlayerActiveRef.current !== state.player.active) {
+      playCry(cryUrl(state.player.team[state.player.active].id));
+      prevPlayerActiveRef.current = state.player.active;
+    }
+  }, [state.player.active, state.player.team, playCry]);
+
+  useEffect(() => {
+    if (prevOppActiveRef.current !== state.opponent.active) {
+      playCry(cryUrl(state.opponent.team[state.opponent.active].id));
+      prevOppActiveRef.current = state.opponent.active;
+    }
+  }, [state.opponent.active, state.opponent.team, playCry]);
 
   const switchableCount = state.player.team.filter(
     (_, i) => i !== state.player.active && state.player.hp[i] > 0,

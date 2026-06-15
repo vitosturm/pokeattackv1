@@ -2,20 +2,30 @@
 
 import { useCallback, useRef } from 'react';
 
-export function useSound(src: string, volume = 0.4) {
+export function useSound(src?: string, volume = 0.4) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const lastSrcRef = useRef<string | undefined>(undefined);
 
-  const play = useCallback(() => {
-    if (typeof window === 'undefined') return;
-    if (!audioRef.current) {
-      audioRef.current = new Audio(src);
-      audioRef.current.volume = volume;
-    }
-    audioRef.current.currentTime = 0;
-    audioRef.current.play().catch(() => {
-      /* silently ignore missing files / autoplay blocks */
-    });
-  }, [src, volume]);
+  const play = useCallback(
+    (overrideSrc?: string) => {
+      if (typeof window === 'undefined') return;
+      const url = overrideSrc ?? src;
+      if (!url) return;
+      if (!audioRef.current || lastSrcRef.current !== url) {
+        audioRef.current = new Audio(url);
+        audioRef.current.volume = volume;
+        lastSrcRef.current = url;
+      }
+      audioRef.current.currentTime = 0;
+      const result = audioRef.current.play();
+      if (result && typeof result.catch === 'function') {
+        result.catch(() => {
+          /* silently ignore missing files / autoplay blocks */
+        });
+      }
+    },
+    [src, volume],
+  );
 
   return play;
 }
