@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { animatedSpriteUrl, spriteUrl } from '@/lib/pokeapi';
 import { padId } from '@/lib/utils';
 import './HeroStage.css';
@@ -189,23 +190,17 @@ export function HeroStage() {
 
       {/* Nav */}
       <div className="nav-bar">
-        <div className="logo">POKEATTACK</div>
+        <Link href="/" className="logo">
+          POKEATTACK
+        </Link>
         <div className="nav-items">
-          <span>Home</span>
-          <span>Roster</span>
-          <span>Battle</span>
-          <span>Leaderboard</span>
-          <span
-            className="cta-nav"
-            role="button"
-            tabIndex={0}
-            onClick={() => router.push('/battle')}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') router.push('/battle');
-            }}
-          >
+          <Link href="/">Home</Link>
+          <Link href="/roster">Roster</Link>
+          <Link href="/battle">Battle</Link>
+          <Link href="/leaderboard">Leaderboard</Link>
+          <Link href="/battle" className="cta-nav">
             Play now
-          </span>
+          </Link>
         </div>
       </div>
 
