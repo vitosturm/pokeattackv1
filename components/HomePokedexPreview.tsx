@@ -93,7 +93,7 @@ export function HomePokedexPreview() {
   const canScrollRight = progress < 0.999;
 
   return (
-    <section className="pt-0 pb-20 px-6 max-w-6xl mx-auto -mt-8">
+    <section className="pt-0 pb-20 px-6 max-w-6xl mx-auto -mt-40 md:-mt-32">
       <header className="flex items-end justify-between mb-8">
         <div>
           <motion.h2

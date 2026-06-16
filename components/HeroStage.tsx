@@ -80,8 +80,9 @@ export function HeroStage() {
           >
             <div className="ring-glow" />
             <div className="pokeball-main">
-              <div className="ball ball-top-half" />
-              <div className="ball ball-bottom-half" />
+              <div className="ball" />
+              <div className="ball-top-half" />
+              <div className="ball-bottom-half" />
               <div className="ball-core-flash" />
               <div className="highlight" />
             </div>
