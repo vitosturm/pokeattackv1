@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Tilt from 'react-parallax-tilt';
 import { motion, useMotionValue } from 'framer-motion';
+import './HomePokedexPreview.css';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { FEATURED_POKEMON } from '@/lib/featured-pokemon';
 import { animatedSpriteUrl, cryUrl, spriteUrl } from '@/lib/pokeapi';
@@ -19,7 +20,7 @@ const CARD_GAP = 16;
 const STEP = CARD_W + CARD_GAP; // distance to scroll per arrow click
 
 export function HomePokedexPreview() {
-  const { roster, add } = useRoster();
+  const { roster, add, remove } = useRoster();
   const playCry = useSound();
   const trackRef = useRef<HTMLDivElement | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
@@ -92,7 +93,7 @@ export function HomePokedexPreview() {
   const canScrollRight = progress < 0.999;
 
   return (
-    <section className="pt-4 pb-20 px-6 max-w-6xl mx-auto">
+    <section className="pt-0 pb-20 px-6 max-w-6xl mx-auto -mt-8">
       <header className="flex items-end justify-between mb-8">
         <div>
           <motion.h2
@@ -194,7 +195,7 @@ export function HomePokedexPreview() {
                     glarePosition="all"
                     transitionSpeed={1500}
                   >
-                    <div className="w-44 bg-[#14141f] border border-white/10 rounded-xl p-3 flex flex-col items-center gap-2 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
+                    <div className="hpp-card w-44 rounded-xl p-3 flex flex-col items-center gap-2 relative overflow-hidden">
                       <span className="text-[10px] text-white/50 self-start font-mono">
                         #{padId(p.id)}
                       </span>
@@ -213,11 +214,11 @@ export function HomePokedexPreview() {
                       <TypeBadge type={p.type as PokemonType} />
                       <motion.button
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => handleQuickAdd(p)}
-                        disabled={inR || roster.length >= MAX_ROSTER}
+                        onClick={() => (inR ? remove(p.id) : handleQuickAdd(p))}
+                        disabled={!inR && roster.length >= MAX_ROSTER}
                         className={`w-full mt-2 py-1.5 rounded-md text-[10px] uppercase font-bold transition ${
                           inR
-                            ? 'bg-white/5 text-white/30 cursor-default'
+                            ? 'bg-white/10 hover:bg-white/15 text-white border border-white/20'
                             : roster.length >= MAX_ROSTER
                               ? 'bg-white/5 text-white/30 cursor-not-allowed'
                               : 'bg-[#ff3860] hover:opacity-90 text-white'
@@ -227,7 +228,7 @@ export function HomePokedexPreview() {
                           letterSpacing: '0.08em',
                         }}
                       >
-                        {inR ? 'Picked' : 'Add'}
+                        {inR ? 'Remove' : 'Add'}
                       </motion.button>
                     </div>
                   </Tilt>
