@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useRoster } from '@/hooks/useRoster';
-import { getPokemonWithMoves, randomGen1Ids } from '@/lib/pokeapi';
+import { useSound } from '@/hooks/useSound';
+import { cryUrl, getPokemonWithMoves, randomGen1Ids } from '@/lib/pokeapi';
 import type { Move, PokemonSummary } from '@/lib/types';
 import { BattleArena } from '@/components/BattleArena';
 import { PokemonCard } from '@/components/PokemonCard';
@@ -25,8 +26,10 @@ interface LoadedBundle {
 export default function BattlePage() {
   const router = useRouter();
   const { roster } = useRoster();
+  const playCry = useSound();
   const [phase, setPhase] = useState<Phase>('pick');
   const [picked, setPicked] = useState<Set<number>>(new Set());
+  const [pickedTouched, setPickedTouched] = useState(false);
   const [bundle, setBundle] = useState<LoadedBundle | null>(null);
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
@@ -36,6 +39,14 @@ export default function BattlePage() {
     battles: number;
     winner: 'player' | 'opponent';
   } | null>(null);
+
+  // When roster has exactly 3 and user hasn't touched the picker, pre-select all 3.
+  const effectivePicked = useMemo(() => {
+    if (!pickedTouched && roster.length === 3) {
+      return new Set(roster.map((p) => p.id));
+    }
+    return picked;
+  }, [pickedTouched, picked, roster]);
 
   if (roster.length < 3) {
     return (
@@ -52,17 +63,24 @@ export default function BattlePage() {
   }
 
   function togglePick(id: number) {
+    setPickedTouched(true);
     setPicked((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else if (next.size < 3) next.add(id);
+      // Seed from the effective set on first touch
+      const seed = !pickedTouched ? effectivePicked : prev;
+      const next = new Set(seed);
+      if (next.has(id)) {
+        next.delete(id);
+      } else if (next.size < 3) {
+        next.add(id);
+        playCry(cryUrl(id));
+      }
       return next;
     });
   }
 
   async function startBattle() {
-    if (picked.size !== 3) return;
-    const team = roster.filter((p) => picked.has(p.id));
+    if (effectivePicked.size !== 3) return;
+    const team = roster.filter((p) => effectivePicked.has(p.id));
     setPhase('loading');
     try {
       const ids = randomGen1Ids(3);
@@ -118,6 +136,7 @@ export default function BattlePage() {
 
   function rematch() {
     setPicked(new Set());
+    setPickedTouched(false);
     setBundle(null);
     setLastResult(null);
     setPhase('pick');
@@ -142,11 +161,11 @@ export default function BattlePage() {
         {phase === 'pick' && (
           <section>
             <p className="mb-4 text-white/70">
-              Choose 3 starters from your roster ({picked.size}/3 selected):
+              Choose 3 starters from your roster ({effectivePicked.size}/3 selected):
             </p>
             <div className="grid gap-4 grid-cols-2 md:grid-cols-3">
               {roster.map((p) => {
-                const on = picked.has(p.id);
+                const on = effectivePicked.has(p.id);
                 return (
                   <div
                     key={p.id}
@@ -171,7 +190,7 @@ export default function BattlePage() {
               })}
             </div>
             <div className="mt-6 flex justify-end">
-              <Button onClick={startBattle} disabled={picked.size !== 3}>
+              <Button onClick={startBattle} disabled={effectivePicked.size !== 3}>
                 Start battle →
               </Button>
             </div>

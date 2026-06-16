@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { TypeBadge } from '@/components/TypeBadge';
 import { TYPES, type PokemonType } from '@/lib/type-chart';
 import { useRoster, MAX_ROSTER } from '@/hooks/useRoster';
+import { useSound } from '@/hooks/useSound';
+import { cryUrl } from '@/lib/pokeapi';
 import { padId } from '@/lib/utils';
 import type { PokemonSummary } from '@/lib/types';
 
@@ -19,6 +21,7 @@ export function PokedexGrid({ all }: Props) {
   const [query, setQuery] = useState('');
   const [activeType, setActiveType] = useState<PokemonType | null>(null);
   const { roster, add } = useRoster();
+  const playCry = useSound();
 
   const rosterIds = useMemo(() => new Set(roster.map((p) => p.id)), [roster]);
 
@@ -41,6 +44,7 @@ export function PokedexGrid({ all }: Props) {
       return;
     }
     add(p);
+    playCry(cryUrl(p.id));
     toast.success(`Added ${p.name} to roster (${roster.length + 1}/${MAX_ROSTER}).`);
   }
 
