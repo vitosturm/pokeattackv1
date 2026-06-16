@@ -1,11 +1,24 @@
 'use client';
 
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import './HeroStage.css';
 
 export function HeroStage() {
   const router = useRouter();
+  const [launching, setLaunching] = useState(false);
+  const triggeredRef = useRef(false);
+
+  function launchBattle() {
+    if (triggeredRef.current) return;
+    triggeredRef.current = true;
+    setLaunching(true);
+    // Total animation ~900ms: ball wobbles+opens (450ms) → flash blooms (300ms) → navigate
+    window.setTimeout(() => {
+      router.push('/battle');
+    }, 850);
+  }
 
   return (
     <div className="hero-stage relative h-[820px] overflow-hidden">
@@ -16,6 +29,7 @@ export function HeroStage() {
         </Link>
         <div className="nav-items">
           <Link href="/">Home</Link>
+          <Link href="/pokedex">Pokédex</Link>
           <Link href="/roster">Roster</Link>
           <Link href="/battle">Battle</Link>
           <Link href="/leaderboard">Leaderboard</Link>
@@ -55,22 +69,25 @@ export function HeroStage() {
 
         <div className="center-stage">
           <div
-            className="pokeball-wrap"
+            className={`pokeball-wrap ${launching ? 'launching' : ''}`}
             role="button"
             tabIndex={0}
-            onClick={() => router.push('/battle')}
+            onClick={launchBattle}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') router.push('/battle');
+              if (e.key === 'Enter' || e.key === ' ') launchBattle();
             }}
             aria-label="Play now — go to battle"
           >
             <div className="ring-glow" />
             <div className="pokeball-main">
-              <div className="ball" />
+              <div className="ball ball-top-half" />
+              <div className="ball ball-bottom-half" />
+              <div className="ball-core-flash" />
               <div className="highlight" />
             </div>
             <div className="pokeball-cta">Play now — Battle</div>
           </div>
+          {launching && <div className="page-flash" />}
         </div>
 
         <div className="stage-right">

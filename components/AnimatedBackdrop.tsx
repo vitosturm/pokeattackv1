@@ -144,8 +144,11 @@ export function AnimatedBackdrop() {
       'b-gold': '#ffea5a',
       'b-green': '#6ee05a',
       'b-purple': '#c060ff',
+      'b-orange': '#ff8a40',
+      'b-pink': '#ff6aa0',
+      'b-teal': '#3dd4c8',
     };
-    const colors = ['', 'b-cyan', 'b-gold', 'b-green', 'b-purple'];
+    const colors = ['', 'b-cyan', 'b-gold', 'b-green', 'b-purple', 'b-orange', 'b-pink', 'b-teal'];
 
     const balls = colors.map((c) => {
       const el = document.createElement('div');
@@ -161,6 +164,7 @@ export function AnimatedBackdrop() {
         vx: Math.cos(a) * speed,
         vy: Math.sin(a) * speed,
         baseSpeed: speed,
+        cooldown: 0,
       };
     });
 
@@ -175,6 +179,50 @@ export function AnimatedBackdrop() {
       setTimeout(() => r.remove(), 800);
     }
 
+    function spawnBurstAndPokemon(x: number, y: number) {
+      // Burst circle
+      const burst = document.createElement('div');
+      const variant = 1 + Math.floor(Math.random() * 3);
+      burst.className = `burst b${variant}`;
+      burst.style.left = x + 'px';
+      burst.style.top = y + 'px';
+      ripples!.appendChild(burst);
+      setTimeout(() => burst.remove(), 750);
+
+      // Spark particles
+      for (let i = 0; i < 10; i++) {
+        const s = document.createElement('div');
+        s.className = 'collision-spark';
+        const angle = (Math.PI * 2 * i) / 10 + Math.random() * 0.4;
+        const dist = 50 + Math.random() * 50;
+        s.style.left = x + 'px';
+        s.style.top = y + 'px';
+        s.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+        s.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+        ripples!.appendChild(s);
+        setTimeout(() => s.remove(), 750);
+      }
+
+      // Spawned Pokémon pops out after the burst peaks
+      setTimeout(() => {
+        const p = FEATURED_POKEMON[Math.floor(Math.random() * FEATURED_POKEMON.length)];
+        const spawn = document.createElement('div');
+        spawn.className = 'spawn-mon';
+        spawn.style.left = x + 'px';
+        spawn.style.top = y + 'px';
+        const img = document.createElement('img');
+        img.src = spriteUrl(p.id);
+        img.alt = '';
+        const lbl = document.createElement('div');
+        lbl.className = 'label';
+        lbl.textContent = p.name;
+        spawn.appendChild(img);
+        spawn.appendChild(lbl);
+        ripples!.appendChild(spawn);
+        setTimeout(() => spawn.remove(), 2300);
+      }, 180);
+    }
+
     let raf = 0;
     let frame = 0;
     function tick() {
@@ -184,6 +232,7 @@ export function AnimatedBackdrop() {
       for (const b of balls) {
         b.x += b.vx;
         b.y += b.vy;
+        if (b.cooldown > 0) b.cooldown--;
         let bumped = false;
         let bx = 0;
         let by = 0;
@@ -226,6 +275,38 @@ export function AnimatedBackdrop() {
           setTimeout(() => t.remove(), 700);
         }
       }
+
+      // Ball-to-ball collisions → burst + Pokémon reveal
+      for (let i = 0; i < balls.length; i++) {
+        for (let j = i + 1; j < balls.length; j++) {
+          const a = balls[i];
+          const c = balls[j];
+          if (a.cooldown > 0 || c.cooldown > 0) continue;
+          const dx = a.x + BALL / 2 - (c.x + BALL / 2);
+          const dy = a.y + BALL / 2 - (c.y + BALL / 2);
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < BALL) {
+            const tvx = a.vx;
+            const tvy = a.vy;
+            a.vx = c.vx;
+            a.vy = c.vy;
+            c.vx = tvx;
+            c.vy = tvy;
+            const nx = dx / (dist || 1);
+            const ny = dy / (dist || 1);
+            a.x += nx * 2;
+            a.y += ny * 2;
+            c.x -= nx * 2;
+            c.y -= ny * 2;
+            a.cooldown = 80;
+            c.cooldown = 80;
+            const cx = (a.x + c.x) / 2 + BALL / 2;
+            const cy = (a.y + c.y) / 2 + BALL / 2;
+            spawnBurstAndPokemon(cx, cy);
+          }
+        }
+      }
+
       raf = requestAnimationFrame(tick);
     }
     raf = requestAnimationFrame(tick);

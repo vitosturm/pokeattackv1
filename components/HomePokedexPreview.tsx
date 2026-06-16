@@ -36,7 +36,7 @@ export function HomePokedexPreview() {
   }
 
   return (
-    <section className="py-20 px-6 max-w-6xl mx-auto">
+    <section className="pt-4 pb-20 px-6 max-w-6xl mx-auto">
       <header className="flex items-end justify-between mb-8">
         <div>
           <h2

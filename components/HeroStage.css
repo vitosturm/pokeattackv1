@@ -657,3 +657,194 @@
   right: 44px;
   text-align: right;
 }
+
+/* ============== POKEBALL OPEN-AND-FLASH (on click) ============== */
+.pokeball-main .ball-top-half,
+.pokeball-main .ball-bottom-half {
+  display: none;
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 4px solid #1a1a1a;
+  overflow: hidden;
+  z-index: 3;
+}
+.pokeball-main .ball-top-half {
+  background: linear-gradient(180deg, #ff5a7a 0%, #ff3860 80%, #cc0030 100%);
+  clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+  box-shadow:
+    inset -10px -12px 24px rgba(0, 0, 0, 0.35),
+    inset 8px 8px 18px rgba(255, 255, 255, 0.25);
+}
+.pokeball-main .ball-bottom-half {
+  background: linear-gradient(180deg, #fff 0%, #f0f0f0 100%);
+  clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
+  box-shadow:
+    inset -10px -12px 24px rgba(0, 0, 0, 0.18),
+    inset 8px 8px 18px rgba(255, 255, 255, 0.4);
+}
+.pokeball-main .ball-core-flash {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, #fff7d6 30%, transparent 70%);
+  transform: translate(-50%, -50%) scale(0);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.pokeball-wrap.launching .ball {
+  /* hide the single-ball look while the halves animate */
+  animation: ball-fade-out 0.18s ease-out forwards;
+}
+.pokeball-wrap.launching .ball-top-half,
+.pokeball-wrap.launching .ball-bottom-half {
+  display: block;
+  animation: pokeball-shake 0.4s ease-in-out;
+}
+.pokeball-wrap.launching .ball-top-half {
+  animation:
+    pokeball-shake 0.35s ease-in-out,
+    pokeball-open-top 0.45s ease-in 0.35s forwards;
+}
+.pokeball-wrap.launching .ball-bottom-half {
+  animation:
+    pokeball-shake 0.35s ease-in-out,
+    pokeball-open-bottom 0.45s ease-in 0.35s forwards;
+}
+.pokeball-wrap.launching .ball-core-flash {
+  display: block;
+  animation: ball-core-flash 0.6s ease-out 0.3s forwards;
+}
+.pokeball-wrap.launching .ring-glow {
+  animation: pokeball-glow-up 0.7s ease-out 0.2s forwards;
+}
+.pokeball-wrap.launching .pokeball-main {
+  animation: pokeball-jump 0.85s ease-in-out forwards;
+}
+.pokeball-wrap.launching .pokeball-cta,
+.pokeball-wrap.launching .highlight {
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
+}
+
+@keyframes ball-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes pokeball-shake {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(-8deg);
+  }
+  40% {
+    transform: rotate(7deg);
+  }
+  60% {
+    transform: rotate(-6deg);
+  }
+  80% {
+    transform: rotate(5deg);
+  }
+}
+@keyframes pokeball-open-top {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-90px) rotate(-22deg);
+    opacity: 0.85;
+  }
+}
+@keyframes pokeball-open-bottom {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(90px) rotate(22deg);
+    opacity: 0.85;
+  }
+}
+@keyframes ball-core-flash {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+  }
+  30% {
+    transform: translate(-50%, -50%) scale(3);
+    opacity: 1;
+    box-shadow:
+      0 0 80px rgba(255, 255, 255, 0.9),
+      0 0 160px rgba(255, 240, 200, 0.7);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(8);
+    opacity: 0;
+    box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+@keyframes pokeball-glow-up {
+  0% {
+    background: radial-gradient(circle, rgba(255, 56, 96, 0.55), transparent 60%);
+    transform: scale(1);
+  }
+  100% {
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.95), transparent 70%);
+    transform: scale(2);
+  }
+}
+@keyframes pokeball-jump {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-25px) scale(1.15);
+  }
+  70% {
+    transform: translateY(-10px) scale(1.05);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* full-screen flash bloom on click */
+.page-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.95),
+    rgba(255, 56, 96, 0.6) 40%,
+    transparent 80%
+  );
+  opacity: 0;
+  pointer-events: none;
+  animation: page-flash 0.85s ease-out forwards;
+}
+@keyframes page-flash {
+  0% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 0;
+  }
+  55% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+  }
+}
