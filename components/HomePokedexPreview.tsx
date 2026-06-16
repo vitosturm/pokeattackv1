@@ -50,8 +50,8 @@ export function HomePokedexPreview() {
             Choose your starters
           </h2>
           <p className="text-white/60 text-sm">
-            Pick up to 6 Pokémon for your roster, then bring 3 into battle. ({roster.length}/
-            {MAX_ROSTER} in roster)
+            Pick up to 6 Pokémon to claim as yours, then bring 3 into battle. ({roster.length}/
+            {MAX_ROSTER} picked)
           </p>
         </div>
         <Link
@@ -105,7 +105,7 @@ export function HomePokedexPreview() {
                   }`}
                   style={{ fontFamily: '"Press Start 2P", monospace', letterSpacing: '0.08em' }}
                 >
-                  {inR ? 'In roster' : 'Add'}
+                  {inR ? 'Picked' : 'Add'}
                 </button>
               </div>
             </Tilt>

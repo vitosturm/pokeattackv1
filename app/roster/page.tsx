@@ -15,7 +15,7 @@ export default function RosterPage() {
       <SiteNav />
       <main className="max-w-5xl mx-auto p-6">
         <header className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold">My Roster ({roster.length}/6)</h1>
+          <h1 className="text-2xl font-semibold">My Pokemons ({roster.length}/6)</h1>
           <div className="flex gap-2">
             <Button variant="ghost" onClick={clear} disabled={!roster.length}>
               Clear

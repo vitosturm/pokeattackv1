@@ -29,8 +29,8 @@ export function HeroStage() {
         </Link>
         <div className="nav-items">
           <Link href="/">Home</Link>
-          <Link href="/pokedex">Pokédex</Link>
-          <Link href="/roster">Roster</Link>
+          <Link href="/pokedex">Pokedex</Link>
+          <Link href="/roster">My Pokemons</Link>
           <Link href="/battle">Battle</Link>
           <Link href="/leaderboard">Leaderboard</Link>
           <Link href="/battle" className="cta-nav">
@@ -60,8 +60,8 @@ export function HeroStage() {
               <button className="btn primary" onClick={() => router.push('/battle')}>
                 Start →
               </button>
-              <button className="btn ghost" onClick={() => router.push('/pokemon/1')}>
-                Pokédex
+              <button className="btn ghost" onClick={() => router.push('/pokedex')}>
+                Pokedex
               </button>
             </div>
           </div>

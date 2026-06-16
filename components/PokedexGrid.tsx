@@ -40,12 +40,12 @@ export function PokedexGrid({ all }: Props) {
       return;
     }
     if (roster.length >= MAX_ROSTER) {
-      toast.error(`Roster is full (${MAX_ROSTER}/${MAX_ROSTER}).`);
+      toast.error(`Your list is full (${MAX_ROSTER}/${MAX_ROSTER}).`);
       return;
     }
     add(p);
     playCry(cryUrl(p.id));
-    toast.success(`Added ${p.name} to roster (${roster.length + 1}/${MAX_ROSTER}).`);
+    toast.success(`Added ${p.name} to your Pokemons (${roster.length + 1}/${MAX_ROSTER}).`);
   }
 
   return (
@@ -62,7 +62,7 @@ export function PokedexGrid({ all }: Props) {
             {filtered.length} / {all.length}
           </span>
           <span className="ml-auto text-sm text-white/60">
-            Roster: {roster.length} / {MAX_ROSTER}
+            My Pokemons: {roster.length} / {MAX_ROSTER}
           </span>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -125,7 +125,7 @@ export function PokedexGrid({ all }: Props) {
                 onClick={() => handleAdd(p)}
                 className="w-full mt-1"
               >
-                {inRoster ? 'In roster' : 'Add'}
+                {inRoster ? 'Picked' : 'Add'}
               </Button>
             </div>
           );

@@ -23,10 +23,10 @@ export function SiteNav() {
             Home
           </Link>
           <Link href="/pokedex" className="hover:text-white">
-            Pokédex
+            Pokedex
           </Link>
           <Link href="/roster" className="hover:text-white">
-            Roster
+            My Pokemons
           </Link>
           <Link href="/battle" className="hover:text-white">
             Battle
