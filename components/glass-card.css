@@ -2,7 +2,7 @@
    Base: white-tinted glass over the animated backdrop.
    Hover: conic-gradient sweeps across the card like a TCG holo finish. */
 
-.hpp-card {
+.glass-card {
   background:
     linear-gradient(
       155deg,
@@ -24,7 +24,7 @@
     box-shadow 0.3s ease;
 }
 
-.hpp-card::before {
+.glass-card::before {
   /* Top-edge glossy highlight */
   content: '';
   position: absolute;
@@ -35,7 +35,7 @@
   z-index: 1;
 }
 
-.hpp-card::after {
+.glass-card::after {
   /* The holo sheen — a thin conic gradient that sweeps across on hover.
      Hidden by default (opacity 0), translated off-screen. On hover, fades in
      and sweeps left→right. mix-blend-mode: overlay gives the iridescent look
@@ -63,7 +63,7 @@
   z-index: 2;
 }
 
-.hpp-card:hover {
+.glass-card:hover {
   border-color: rgba(255, 255, 255, 0.28);
   box-shadow:
     0 16px 40px rgba(0, 0, 0, 0.5),
@@ -72,12 +72,12 @@
     0 0 60px rgba(255, 56, 96, 0.12);
 }
 
-.hpp-card:hover::after {
+.glass-card:hover::after {
   opacity: 1;
-  animation: hpp-holo-sweep 1.4s ease-in-out infinite;
+  animation: glass-card-holo-sweep 1.4s ease-in-out infinite;
 }
 
-@keyframes hpp-holo-sweep {
+@keyframes glass-card-holo-sweep {
   0% {
     transform: translateX(-40%) rotate(0deg);
   }
@@ -90,13 +90,13 @@
 }
 
 /* Inner content sits above the pseudo-elements so it's not washed out */
-.hpp-card > * {
+.glass-card > * {
   position: relative;
   z-index: 3;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hpp-card:hover::after {
+  .glass-card:hover::after {
     animation: none;
   }
 }

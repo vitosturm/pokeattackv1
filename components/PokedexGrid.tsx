@@ -12,6 +12,7 @@ import { useSound } from '@/hooks/useSound';
 import { cryUrl } from '@/lib/pokeapi';
 import { padId } from '@/lib/utils';
 import type { PokemonSummary } from '@/lib/types';
+import './glass-card.css';
 
 interface Props {
   all: PokemonSummary[];
@@ -20,7 +21,7 @@ interface Props {
 export function PokedexGrid({ all }: Props) {
   const [query, setQuery] = useState('');
   const [activeType, setActiveType] = useState<PokemonType | null>(null);
-  const { roster, add } = useRoster();
+  const { roster, add, remove } = useRoster();
   const playCry = useSound();
 
   const rosterIds = useMemo(() => new Set(roster.map((p) => p.id)), [roster]);
@@ -98,7 +99,7 @@ export function PokedexGrid({ all }: Props) {
           return (
             <div
               key={p.id}
-              className="bg-[#14141f] border border-white/10 rounded-lg p-3 flex flex-col items-center gap-2"
+              className="glass-card relative overflow-hidden rounded-xl p-3 flex flex-col items-center gap-2"
             >
               <Link href={`/pokemon/${p.id}`} className="contents">
                 <span className="text-[10px] text-white/50 self-start font-mono">
@@ -120,12 +121,12 @@ export function PokedexGrid({ all }: Props) {
               </Link>
               <Button
                 size="sm"
-                variant={inRoster ? 'ghost' : 'default'}
-                disabled={inRoster || roster.length >= MAX_ROSTER}
-                onClick={() => handleAdd(p)}
+                variant={inRoster ? 'outline' : 'default'}
+                disabled={!inRoster && roster.length >= MAX_ROSTER}
+                onClick={() => (inRoster ? remove(p.id) : handleAdd(p))}
                 className="w-full mt-1"
               >
-                {inRoster ? 'Picked' : 'Add'}
+                {inRoster ? 'Remove' : 'Add'}
               </Button>
             </div>
           );

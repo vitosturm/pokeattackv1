@@ -3,8 +3,8 @@
 import type { PokemonSummary } from '@/lib/types';
 import { TypeBadge } from './TypeBadge';
 import { padId } from '@/lib/utils';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import './glass-card.css';
 
 interface Props {
   pokemon: PokemonSummary;
@@ -13,8 +13,9 @@ interface Props {
 
 export function PokemonCard({ pokemon, onAdd }: Props) {
   return (
-    <Card className="p-4 flex flex-col items-center gap-2 bg-[#14141f] border-white/10">
+    <div className="glass-card relative overflow-hidden rounded-xl p-4 flex flex-col items-center gap-2">
       <span className="text-xs text-white/60 self-start font-mono">#{padId(pokemon.id)}</span>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={pokemon.sprite} alt={pokemon.name} className="w-32 h-32 object-contain" />
       <span className="text-lg font-semibold capitalize">{pokemon.name}</span>
       <div className="flex gap-1">
@@ -27,6 +28,6 @@ export function PokemonCard({ pokemon, onAdd }: Props) {
           Add to roster
         </Button>
       )}
-    </Card>
+    </div>
   );
 }

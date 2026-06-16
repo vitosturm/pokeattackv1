@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Tilt from 'react-parallax-tilt';
 import { motion, useMotionValue } from 'framer-motion';
-import './HomePokedexPreview.css';
+import './glass-card.css';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { FEATURED_POKEMON } from '@/lib/featured-pokemon';
 import { animatedSpriteUrl, cryUrl, spriteUrl } from '@/lib/pokeapi';
@@ -195,7 +195,7 @@ export function HomePokedexPreview() {
                     glarePosition="all"
                     transitionSpeed={1500}
                   >
-                    <div className="hpp-card w-44 rounded-xl p-3 flex flex-col items-center gap-2 relative overflow-hidden">
+                    <div className="glass-card w-44 rounded-xl p-3 flex flex-col items-center gap-2 relative overflow-hidden">
                       <span className="text-[10px] text-white/50 self-start font-mono">
                         #{padId(p.id)}
                       </span>
