@@ -5,6 +5,10 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { animatedSpriteUrl, spriteUrl } from '@/lib/pokeapi';
 import { padId } from '@/lib/utils';
+import {
+  FEATURED_POKEMON as POKEMON,
+  type FeaturedPokemon as Picked,
+} from '@/lib/featured-pokemon';
 import './HeroStage.css';
 
 const subscribeNoop = () => () => {};
@@ -15,41 +19,6 @@ function useIsClient(): boolean {
     () => false,
   );
 }
-
-const POKEMON = [
-  { id: 1, name: 'bulbasaur', type: 'grass' },
-  { id: 4, name: 'charmander', type: 'fire' },
-  { id: 7, name: 'squirtle', type: 'water' },
-  { id: 25, name: 'pikachu', type: 'electric' },
-  { id: 6, name: 'charizard', type: 'fire' },
-  { id: 9, name: 'blastoise', type: 'water' },
-  { id: 3, name: 'venusaur', type: 'grass' },
-  { id: 39, name: 'jigglypuff', type: 'fairy' },
-  { id: 54, name: 'psyduck', type: 'water' },
-  { id: 63, name: 'abra', type: 'psychic' },
-  { id: 74, name: 'geodude', type: 'rock' },
-  { id: 92, name: 'gastly', type: 'ghost' },
-  { id: 94, name: 'gengar', type: 'ghost' },
-  { id: 113, name: 'chansey', type: 'normal' },
-  { id: 131, name: 'lapras', type: 'ice' },
-  { id: 133, name: 'eevee', type: 'normal' },
-  { id: 143, name: 'snorlax', type: 'normal' },
-  { id: 149, name: 'dragonite', type: 'dragon' },
-  { id: 150, name: 'mewtwo', type: 'psychic' },
-  { id: 151, name: 'mew', type: 'psychic' },
-  { id: 130, name: 'gyarados', type: 'water' },
-  { id: 59, name: 'arcanine', type: 'fire' },
-  { id: 65, name: 'alakazam', type: 'psychic' },
-  { id: 68, name: 'machamp', type: 'fighting' },
-  { id: 38, name: 'ninetales', type: 'fire' },
-  { id: 103, name: 'exeggutor', type: 'grass' },
-  { id: 115, name: 'kangaskhan', type: 'normal' },
-  { id: 144, name: 'articuno', type: 'ice' },
-  { id: 145, name: 'zapdos', type: 'electric' },
-  { id: 146, name: 'moltres', type: 'fire' },
-] as const;
-
-type Picked = (typeof POKEMON)[number];
 
 function shuffle<T>(arr: readonly T[]): T[] {
   const a = arr.slice();
