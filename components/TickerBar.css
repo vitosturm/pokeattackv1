@@ -1,0 +1,76 @@
+.ticker-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.35), transparent);
+  backdrop-filter: blur(6px) saturate(1.2);
+  -webkit-backdrop-filter: blur(6px) saturate(1.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+  padding: 18px 0;
+  z-index: 40;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+}
+.ticker-bar .ticker-track {
+  display: flex;
+  white-space: nowrap;
+  align-items: center;
+  animation: ticker-marquee 40s linear infinite;
+  font-size: 22px;
+  letter-spacing: 0.06em;
+  color: white;
+  text-transform: uppercase;
+  font-family: 'Bangers', 'Impact', sans-serif;
+  text-shadow:
+    2px 2px 0 #1a1a1a,
+    3px 3px 0 rgba(255, 56, 96, 0.5);
+  -webkit-text-stroke: 0.5px rgba(0, 0, 0, 0.5);
+}
+.ticker-bar .ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 32px;
+}
+.ticker-bar .ticker-item .sep {
+  color: #ff3860;
+  font-size: 14px;
+}
+.ticker-bar .ticker-item .avatar {
+  width: 44px;
+  height: 44px;
+  display: inline-block;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+  object-fit: contain;
+}
+.ticker-bar .ticker-item .num {
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  color: #ff3860;
+  letter-spacing: 0.1em;
+  margin-left: 4px;
+}
+@keyframes ticker-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+/* Hide on very small mobile to give back screen real estate */
+@media (max-width: 480px) {
+  .ticker-bar {
+    padding: 12px 0;
+  }
+  .ticker-bar .ticker-track {
+    font-size: 18px;
+  }
+  .ticker-bar .ticker-item .avatar {
+    width: 36px;
+    height: 36px;
+  }
+}
