@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Toaster } from 'sonner';
+import { AnimatedBackdrop } from '@/components/AnimatedBackdrop';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -19,6 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="min-h-screen bg-[#0a0a0f] text-[#e8e8ee] antialiased">
+        <AnimatedBackdrop />
         {children}
         <Toaster richColors position="top-right" />
       </body>
