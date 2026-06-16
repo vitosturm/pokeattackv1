@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import './HeroStage.css';
+import './SiteNav.css';
 
 export function HeroStage() {
   const router = useRouter();
