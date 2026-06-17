@@ -313,12 +313,13 @@
   filter: drop-shadow(2px 2px 0 #1a1a1a);
 }
 
-/* Left: team slots */
+/* Left: team slots — 3×2 grid so each sprite reads large now that the headline
+   is gone and the screen space is fully used for the roster. */
 .team-slots {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 6px;
-  margin-bottom: 12px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
 }
 .team-slot {
   aspect-ratio: 1;
@@ -346,7 +347,7 @@
 }
 .team-slot-plus {
   color: rgba(255, 255, 255, 0.25);
-  font-size: 16px;
+  font-size: 28px;
   font-weight: 700;
   line-height: 1;
 }

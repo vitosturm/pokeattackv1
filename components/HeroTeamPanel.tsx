@@ -38,14 +38,6 @@ export function HeroTeamPanel() {
           <span>Your Team</span>
         </div>
 
-        <h2 className="hero-panel-title">
-          Train.
-          <br />
-          Battle.
-          <br />
-          <em>Conquer.</em>
-        </h2>
-
         <div className="team-slots">
           {slots.map((p, i) => (
             <div key={i} className={`team-slot ${p ? 'filled' : ''}`}>
