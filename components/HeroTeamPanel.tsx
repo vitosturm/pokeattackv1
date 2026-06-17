@@ -34,8 +34,8 @@ export function HeroTeamPanel() {
     <GbDevice side="left">
       <div className="hero-panel">
         <div className="hero-panel-head">
-          <span className="dot-status" />
-          <span>Mission · Your Team</span>
+          <span className="gb-caret">▸</span>
+          <span>Your Team</span>
         </div>
 
         <h2 className="hero-panel-title">

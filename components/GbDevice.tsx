@@ -16,10 +16,6 @@ export function GbDevice({ side, children }: GbDeviceProps) {
   return (
     <div className={`gb-device gb-device--${side}`}>
       <div className="gb-screen-frame">
-        <div className="gb-screen-brand" aria-hidden="true">
-          <span className="gb-dot" />
-          DOT MATRIX WITH STEREO SOUND
-        </div>
         <div className="gb-screen">{children}</div>
       </div>
 
