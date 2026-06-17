@@ -20,15 +20,16 @@ const STEP = CARD_W + CARD_GAP; // distance to scroll per arrow click
 
 const MotionButton = motion.create(Button);
 
-// Featured entries only carry {id, name, type}; the carousel needs a PokemonSummary
-// for the HoloCard frame. Real stats aren't fetched on the home page, so use neutral
-// placeholders (same as the quick-add path).
-function toSummary(p: { id: number; name: string; type: string }): PokemonSummary {
+type Featured = (typeof FEATURED_POKEMON)[number];
+
+// Map a featured entry (which now carries real Gen-1 base stats) to a PokemonSummary
+// for the HoloCard frame and for persisting into the roster.
+function toSummary(p: Featured): PokemonSummary {
   return {
     id: p.id,
     name: p.name,
     types: [p.type as PokemonType],
-    stats: { hp: 50, attack: 50, defense: 50, specialAttack: 50, specialDefense: 50, speed: 50 },
+    stats: { ...p.stats },
     sprite: spriteUrl(p.id),
   };
 }
@@ -112,7 +113,7 @@ export function HomePokedexPreview() {
 
   const inRoster = (id: number) => roster.some((p) => p.id === id);
 
-  function handleQuickAdd(p: { id: number; name: string; type: string }) {
+  function handleQuickAdd(p: Featured) {
     if (inRoster(p.id) || roster.length >= MAX_ROSTER) return;
     add(toSummary(p));
     playCry(cryUrl(p.id));
