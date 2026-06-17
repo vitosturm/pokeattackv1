@@ -20,8 +20,8 @@ export function HeroLeaderboardPanel({ topRows, summary }: Props) {
     <GbDevice side="right">
       <div className="hero-panel hero-panel-right">
         <div className="hero-panel-head">
+          <span className="gb-caret">▸</span>
           <span>Top Trainers</span>
-          <span className="gb-caret">◂</span>
         </div>
 
         {hasScores ? (

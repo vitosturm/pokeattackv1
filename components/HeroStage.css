@@ -278,7 +278,7 @@
   width: 100%;
 }
 .hero-panel-right .hero-panel-head {
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 .hero-panel-head .dot-status {
   width: 6px;
@@ -607,19 +607,8 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-/* ----- Mirror: right device faces its controls toward the centre ----- */
-.gb-device--right .gb-controls {
-  direction: rtl;
-}
-.gb-device--right .gb-dpad {
-  justify-self: end;
-}
-.gb-device--right .gb-ab {
-  justify-self: start;
-}
-.gb-device--right .gb-brand {
-  justify-content: flex-end;
-}
+/* Both devices use the identical classic Game Boy layout: D-pad left, A/B right.
+   (No mirroring — the `side` prop only positions the device within the stage.) */
 
 /* ----- Inner content recoloured for the green LCD ----- */
 .gb-screen .hero-panel-head {
