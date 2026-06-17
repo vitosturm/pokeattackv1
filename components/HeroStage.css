@@ -29,27 +29,19 @@
   z-index: 10;
   gap: 24px;
 }
+/* The stage cells are now just positioning wrappers; the Game Boy device below
+   is the visible container. */
 .stage-left,
 .stage-right {
   position: relative;
-  padding: 22px 20px 20px;
-  background: linear-gradient(155deg, rgba(20, 15, 35, 0.55), rgba(10, 8, 20, 0.35));
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
-  backdrop-filter: blur(14px) saturate(1.2);
-  box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  overflow: visible;
   width: 100%;
-  max-width: 360px;
+  max-width: 320px;
 }
 .stage-left {
   justify-self: start;
 }
 .stage-right {
   justify-self: end;
-  text-align: right;
 }
 
 .gb-screen {
@@ -442,6 +434,285 @@
   color: rgba(255, 255, 255, 0.7);
   line-height: 1.5;
   margin-bottom: 12px;
+}
+
+/* ============== GAME BOY DEVICE (DMG-01) ============== */
+.gb-device {
+  position: relative;
+  width: 100%;
+  padding: 16px 16px 14px;
+  border-radius: 12px 12px 48px 12px; /* classic DMG: big round bottom-right */
+  background: linear-gradient(160deg, #d4d4d9 0%, #bcbcc4 45%, #a6a6ae 100%);
+  box-shadow:
+    0 14px 40px rgba(0, 0, 0, 0.5),
+    inset 0 2px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.25),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+/* subtle seam line near the top like the real shell */
+.gb-device::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 9px;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* ----- Screen ----- */
+.gb-screen-frame {
+  position: relative;
+  background: linear-gradient(160deg, #4a4a52, #2c2c33);
+  border-radius: 8px 8px 24px 8px;
+  padding: 16px 18px 18px;
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.6),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+}
+.gb-screen-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 5.5px;
+  letter-spacing: 0.1em;
+  color: #8b8ba0;
+  margin-bottom: 8px;
+}
+.gb-screen-brand .gb-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #c03a5a;
+  box-shadow: 0 0 4px rgba(192, 58, 90, 0.8);
+}
+.gb-screen {
+  position: relative;
+  border-radius: 5px;
+  padding: 16px 14px 14px;
+  /* Green dot-matrix LCD */
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(15, 56, 15, 0.12) 0px,
+      rgba(15, 56, 15, 0.12) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    linear-gradient(160deg, #9bbc0f 0%, #8bac0f 60%, #7b9c0f 100%);
+  box-shadow: inset 0 0 22px rgba(15, 56, 15, 0.35);
+  overflow: hidden;
+}
+.gb-screen::after {
+  /* glossy reflection */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.22), transparent 45%);
+  pointer-events: none;
+}
+
+/* ----- Brand wordmark under screen ----- */
+.gb-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 10px 4px 4px;
+}
+.gb-brand-nintendo {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 11px;
+  color: #4a4a52;
+}
+.gb-brand-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: #2c2c33;
+}
+.gb-brand-tm {
+  font-size: 5px;
+  vertical-align: super;
+}
+
+/* ----- Controls (decorative) ----- */
+.gb-controls {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px 2px;
+  pointer-events: none;
+}
+.gb-dpad {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  justify-self: start;
+}
+.gb-dpad-v,
+.gb-dpad-h {
+  position: absolute;
+  background: linear-gradient(160deg, #3a3a42, #1e1e24);
+  border-radius: 4px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.gb-dpad-v {
+  left: 16px;
+  top: 0;
+  width: 14px;
+  height: 46px;
+}
+.gb-dpad-h {
+  top: 16px;
+  left: 0;
+  width: 46px;
+  height: 14px;
+}
+.gb-dpad-center {
+  position: absolute;
+  left: 17px;
+  top: 17px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.25);
+}
+.gb-ab {
+  display: flex;
+  gap: 10px;
+  justify-self: end;
+  align-items: center;
+}
+.gb-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: #6a1230;
+  background: radial-gradient(circle at 35% 30%, #ff6f91, var(--accent) 70%);
+  box-shadow:
+    inset 0 -2px 3px rgba(0, 0, 0, 0.3),
+    0 2px 3px rgba(0, 0, 0, 0.3);
+}
+.gb-btn-b {
+  transform: translateY(8px);
+}
+.gb-startselect {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 2px;
+}
+.gb-startselect .gb-pill {
+  width: 26px;
+  height: 8px;
+  border-radius: 100px;
+  background: linear-gradient(160deg, #3a3a42, #1e1e24);
+  transform: rotate(-25deg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* ----- Mirror: right device faces its controls toward the centre ----- */
+.gb-device--right .gb-controls {
+  direction: rtl;
+}
+.gb-device--right .gb-dpad {
+  justify-self: end;
+}
+.gb-device--right .gb-ab {
+  justify-self: start;
+}
+.gb-device--right .gb-brand {
+  justify-content: flex-end;
+}
+
+/* ----- Inner content recoloured for the green LCD ----- */
+.gb-screen .hero-panel-head {
+  color: #2f5d1e;
+  border-bottom-color: rgba(15, 56, 15, 0.3);
+}
+.gb-screen .hero-panel-head .dot-status {
+  background: #2f5d1e;
+  box-shadow: none;
+}
+.gb-screen .hero-panel-head .dot-status.red {
+  background: #6a1230;
+  box-shadow: none;
+}
+.gb-screen .hero-panel-title {
+  font-size: 30px;
+  color: #1c3a0c;
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.25);
+}
+.gb-screen .hero-panel-title em {
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  -webkit-text-fill-color: initial;
+  color: #0f380f;
+  filter: none;
+}
+.gb-screen .team-slot {
+  border-color: rgba(15, 56, 15, 0.35);
+  background: rgba(15, 56, 15, 0.08);
+  border-radius: 4px;
+}
+.gb-screen .team-slot.filled {
+  border-color: rgba(15, 56, 15, 0.6);
+  box-shadow: inset 0 0 8px rgba(15, 56, 15, 0.25);
+}
+.gb-screen .team-slot-plus {
+  color: rgba(15, 56, 15, 0.4);
+}
+.gb-screen .team-progress-label {
+  color: #2f5d1e;
+}
+.gb-screen .team-progress-track {
+  background: rgba(15, 56, 15, 0.2);
+}
+.gb-screen .team-progress-fill {
+  background: linear-gradient(90deg, #1c3a0c, #4a7a1e);
+}
+.gb-screen .lb-row {
+  background: rgba(15, 56, 15, 0.08);
+  border-color: rgba(15, 56, 15, 0.25);
+}
+.gb-screen .lb-name {
+  color: #1c3a0c;
+}
+.gb-screen .lb-score {
+  color: #6a1230;
+}
+.gb-screen .lb-summary,
+.gb-screen .lb-empty p {
+  color: #2f5d1e;
+}
+.gb-screen .live-row {
+  color: #2f5d1e;
+}
+/* CTA button on the LCD: dark-green pixel button */
+.gb-screen .btn {
+  font-size: 8px;
+  background: #1c3a0c;
+  color: #9bbc0f;
+  border: 1px solid #0f380f;
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.3);
+}
+.gb-screen .btn.ghost {
+  background: rgba(15, 56, 15, 0.12);
+  color: #1c3a0c;
 }
 
 /* ============== CENTER POKEBALL ============== */
