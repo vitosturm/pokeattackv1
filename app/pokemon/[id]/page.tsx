@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { getPokemon } from '@/lib/pokeapi';
 import { PokemonCard } from '@/components/PokemonCard';
 import { StatRadar } from '@/components/StatRadar';
+import { StatGrid } from '@/components/StatGrid';
 import { TypeBadge } from '@/components/TypeBadge';
 import { SiteNav } from '@/components/SiteNav';
 
@@ -29,6 +30,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
             ))}
           </div>
           <StatRadar pokemon={p} />
+          <StatGrid pokemon={p} />
         </section>
       </main>
     </>

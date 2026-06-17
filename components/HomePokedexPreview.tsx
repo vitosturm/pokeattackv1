@@ -12,12 +12,15 @@ import { padId } from '@/lib/utils';
 import { useRoster, MAX_ROSTER } from '@/hooks/useRoster';
 import { useSound } from '@/hooks/useSound';
 import { TypeBadge } from '@/components/TypeBadge';
+import { Button } from '@/components/ui/button';
 import type { PokemonType } from '@/lib/type-chart';
 import type { PokemonSummary } from '@/lib/types';
 
 const CARD_W = 180; // visual width (176px card + 4px buffer for shadows/edges)
 const CARD_GAP = 16;
 const STEP = CARD_W + CARD_GAP; // distance to scroll per arrow click
+
+const MotionButton = motion.create(Button);
 
 export function HomePokedexPreview() {
   const { roster, add, remove } = useRoster();
@@ -93,7 +96,7 @@ export function HomePokedexPreview() {
   const canScrollRight = progress < 0.999;
 
   return (
-    <section className="pt-0 pb-20 px-6 max-w-6xl mx-auto -mt-40 md:-mt-32">
+    <section className="relative z-30 pt-0 pb-20 px-6 max-w-6xl mx-auto -mt-40 md:-mt-32">
       <header className="flex items-end justify-between mb-8">
         <div>
           <motion.h2
@@ -212,24 +215,16 @@ export function HomePokedexPreview() {
                       />
                       <span className="capitalize font-semibold text-sm">{p.name}</span>
                       <TypeBadge type={p.type as PokemonType} />
-                      <motion.button
+                      <MotionButton
                         whileTap={{ scale: 0.95 }}
+                        size="sm"
+                        variant={inR ? 'outline' : 'default'}
                         onClick={() => (inR ? remove(p.id) : handleQuickAdd(p))}
                         disabled={!inR && roster.length >= MAX_ROSTER}
-                        className={`w-full mt-2 py-1.5 rounded-md text-[10px] uppercase font-bold transition ${
-                          inR
-                            ? 'bg-white/10 hover:bg-white/15 text-white border border-white/20'
-                            : roster.length >= MAX_ROSTER
-                              ? 'bg-white/5 text-white/30 cursor-not-allowed'
-                              : 'bg-[#ff3860] hover:opacity-90 text-white'
-                        }`}
-                        style={{
-                          fontFamily: '"Press Start 2P", monospace',
-                          letterSpacing: '0.08em',
-                        }}
+                        className="w-full mt-2"
                       >
                         {inR ? 'Remove' : 'Add'}
-                      </motion.button>
+                      </MotionButton>
                     </div>
                   </Tilt>
                 </motion.div>
