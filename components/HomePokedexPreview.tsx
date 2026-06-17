@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import Tilt from 'react-parallax-tilt';
 import { motion, useMotionValue } from 'framer-motion';
@@ -13,7 +13,7 @@ import { useRoster, MAX_ROSTER } from '@/hooks/useRoster';
 import { useSound } from '@/hooks/useSound';
 import { TypeBadge } from '@/components/TypeBadge';
 import { Button } from '@/components/ui/button';
-import type { PokemonType } from '@/lib/type-chart';
+import { TYPES, type PokemonType } from '@/lib/type-chart';
 import type { PokemonSummary } from '@/lib/types';
 
 const CARD_W = 180; // visual width (176px card + 4px buffer for shadows/edges)
@@ -29,10 +29,26 @@ export function HomePokedexPreview() {
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const [dragBounds, setDragBounds] = useState({ left: 0, right: 0 });
   const [progress, setProgress] = useState(0);
+  const [activeType, setActiveType] = useState<PokemonType | null>(null);
 
   const x = useMotionValue(0);
 
-  // Compute drag bounds whenever the layout changes
+  // Only the types actually present in the featured set, in canonical TYPES order.
+  const availableTypes = useMemo(() => {
+    const present = new Set(FEATURED_POKEMON.map((p) => p.type as PokemonType));
+    return TYPES.filter((t) => present.has(t));
+  }, []);
+
+  // Featured list filtered to the active type (or all when no filter).
+  const visible = useMemo(
+    () => (activeType ? FEATURED_POKEMON.filter((p) => p.type === activeType) : FEATURED_POKEMON),
+    [activeType],
+  );
+
+  // Up to 3 rows; fewer when the filtered set is small so it stays centered.
+  const rows = Math.min(3, Math.max(1, visible.length));
+
+  // Compute drag bounds whenever the layout or the filtered set changes.
   useEffect(() => {
     function measure() {
       const track = trackRef.current;
@@ -41,10 +57,16 @@ export function HomePokedexPreview() {
       const overflow = Math.max(0, track.scrollWidth - viewport.clientWidth);
       setDragBounds({ left: -overflow, right: 0 });
     }
-    measure();
+    // Reset to the left edge so a shorter filtered track never stays out of bounds,
+    // then measure after the new grid has laid out.
+    x.set(0);
+    const raf = requestAnimationFrame(measure);
     window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
-  }, []);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', measure);
+    };
+  }, [activeType, rows, x]);
 
   // Track drag x to show progress bar
   useEffect(() => {
@@ -92,8 +114,9 @@ export function HomePokedexPreview() {
     playCry(cryUrl(p.id));
   }
 
-  const canScrollLeft = progress > 0.001;
-  const canScrollRight = progress < 0.999;
+  const hasOverflow = dragBounds.left < 0;
+  const canScrollLeft = hasOverflow && progress > 0.001;
+  const canScrollRight = hasOverflow && progress < 0.999;
 
   return (
     <section className="relative z-30 pt-0 pb-20 px-6 max-w-6xl mx-auto -mt-40 md:-mt-32">
@@ -128,6 +151,41 @@ export function HomePokedexPreview() {
           </Link>
         </div>
       </header>
+
+      {/* Type filter — compresses the carousel to a single type */}
+      <div className="mb-5">
+        <p
+          className="text-[10px] uppercase text-white/50 mb-2"
+          style={{ fontFamily: '"Press Start 2P", monospace', letterSpacing: '0.12em' }}
+        >
+          Filter by type
+        </p>
+        <div className="flex gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={() => setActiveType(null)}
+            className={`px-2.5 py-0.5 rounded-full text-xs uppercase font-semibold border transition ${
+              activeType === null
+                ? 'bg-white text-black border-white'
+                : 'border-white/20 text-white/70 hover:text-white'
+            }`}
+          >
+            all
+          </button>
+          {availableTypes.map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => setActiveType(t === activeType ? null : t)}
+              className={`transition ${
+                activeType === t ? 'scale-110' : 'opacity-60 hover:opacity-100'
+              }`}
+            >
+              <TypeBadge type={t} />
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* Carousel viewport */}
       <div className="relative">
@@ -170,14 +228,14 @@ export function HomePokedexPreview() {
         <div ref={viewportRef} className="overflow-hidden px-6">
           <motion.div
             ref={trackRef}
-            className="flex gap-4 cursor-grab active:cursor-grabbing"
+            className="grid grid-flow-col gap-4 cursor-grab active:cursor-grabbing"
+            style={{ x, gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))` }}
             drag="x"
             dragConstraints={dragBounds}
             dragElastic={0.12}
             dragTransition={{ bounceStiffness: 240, bounceDamping: 22 }}
-            style={{ x }}
           >
-            {FEATURED_POKEMON.map((p, idx) => {
+            {visible.map((p, idx) => {
               const inR = inRoster(p.id);
               return (
                 <motion.div
@@ -185,9 +243,8 @@ export function HomePokedexPreview() {
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: '-80px' }}
-                  transition={{ duration: 0.5, delay: Math.min(idx * 0.04, 0.6) }}
+                  transition={{ duration: 0.5, delay: Math.min(idx * 0.03, 0.45) }}
                   whileHover={{ y: -6 }}
-                  className="shrink-0"
                 >
                   <Tilt
                     tiltMaxAngleX={10}
@@ -233,15 +290,21 @@ export function HomePokedexPreview() {
           </motion.div>
         </div>
 
-        {/* Scroll progress bar */}
-        <div className="mt-4 mx-6 h-1 rounded-full bg-white/5 overflow-hidden">
-          <motion.div
-            className="h-full bg-gradient-to-r from-[#ff3860] to-[#ffd14a]"
-            style={{ width: `${progress * 100}%` }}
-            transition={{ type: 'spring', stiffness: 200, damping: 30 }}
-          />
-        </div>
+        {/* Scroll progress bar — only meaningful when the track overflows */}
+        {hasOverflow && (
+          <div className="mt-4 mx-6 h-1 rounded-full bg-white/5 overflow-hidden">
+            <motion.div
+              className="h-full bg-gradient-to-r from-[#ff3860] to-[#ffd14a]"
+              style={{ width: `${progress * 100}%` }}
+              transition={{ type: 'spring', stiffness: 200, damping: 30 }}
+            />
+          </div>
+        )}
       </div>
+
+      {visible.length === 0 && (
+        <p className="text-center text-white/50 py-8">No featured Pokémon of this type.</p>
+      )}
     </section>
   );
 }
