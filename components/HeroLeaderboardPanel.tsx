@@ -37,20 +37,20 @@ export function HeroLeaderboardPanel({ topRows, summary }: Props) {
           </ul>
 
           <div className="lb-summary">
-            <span>{summary.players} Trainer</span>
+            <span>{summary.players} trainers</span>
             <span className="lb-dot">·</span>
-            <span>{summary.battles} Battles</span>
+            <span>{summary.battles} battles</span>
           </div>
 
           <button className="btn ghost" onClick={() => router.push('/leaderboard')}>
-            Bestenliste →
+            Leaderboard →
           </button>
         </>
       ) : (
         <div className="lb-empty">
-          <p>Noch keine Scores — sei der Erste an der Spitze.</p>
+          <p>No scores yet — be the first to claim #1.</p>
           <button className="btn primary" onClick={() => router.push('/battle')}>
-            Battle starten →
+            Start battle →
           </button>
         </div>
       )}

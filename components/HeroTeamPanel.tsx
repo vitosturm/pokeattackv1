@@ -24,16 +24,16 @@ export function HeroTeamPanel() {
 
   const cta =
     count >= 3
-      ? { label: 'Battle starten →', onClick: () => router.push('/battle') }
+      ? { label: 'Start battle →', onClick: () => router.push('/battle') }
       : count > 0
-        ? { label: 'Weiter wählen →', onClick: () => router.push('/pokedex') }
-        : { label: 'Starter wählen →', onClick: () => router.push('/pokedex') };
+        ? { label: 'Pick more →', onClick: () => router.push('/pokedex') }
+        : { label: 'Pick your starters →', onClick: () => router.push('/pokedex') };
 
   return (
     <div className="hero-panel">
       <div className="hero-panel-head">
         <span className="dot-status" />
-        <span>Mission · Dein Team</span>
+        <span>Mission · Your Team</span>
       </div>
 
       <h2 className="hero-panel-title">
@@ -59,7 +59,7 @@ export function HeroTeamPanel() {
 
       <div className="team-progress">
         <span className="team-progress-label">
-          {count}/{MAX_ROSTER} gewählt
+          {count}/{MAX_ROSTER} picked
         </span>
         <div className="team-progress-track">
           <div className="team-progress-fill" style={{ width: `${(count / MAX_ROSTER) * 100}%` }} />
