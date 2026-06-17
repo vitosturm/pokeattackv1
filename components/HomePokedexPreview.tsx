@@ -2,16 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import Tilt from 'react-parallax-tilt';
 import { motion, useMotionValue } from 'framer-motion';
-import './glass-card.css';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { FEATURED_POKEMON } from '@/lib/featured-pokemon';
 import { animatedSpriteUrl, cryUrl, spriteUrl } from '@/lib/pokeapi';
-import { padId } from '@/lib/utils';
 import { useRoster, MAX_ROSTER } from '@/hooks/useRoster';
 import { useSound } from '@/hooks/useSound';
 import { TypeBadge } from '@/components/TypeBadge';
+import { HoloCard } from '@/components/HoloCard';
 import { Button } from '@/components/ui/button';
 import { TYPES, type PokemonType } from '@/lib/type-chart';
 import type { PokemonSummary } from '@/lib/types';
@@ -21,6 +19,19 @@ const CARD_GAP = 16;
 const STEP = CARD_W + CARD_GAP; // distance to scroll per arrow click
 
 const MotionButton = motion.create(Button);
+
+// Featured entries only carry {id, name, type}; the carousel needs a PokemonSummary
+// for the HoloCard frame. Real stats aren't fetched on the home page, so use neutral
+// placeholders (same as the quick-add path).
+function toSummary(p: { id: number; name: string; type: string }): PokemonSummary {
+  return {
+    id: p.id,
+    name: p.name,
+    types: [p.type as PokemonType],
+    stats: { hp: 50, attack: 50, defense: 50, specialAttack: 50, specialDefense: 50, speed: 50 },
+    sprite: spriteUrl(p.id),
+  };
+}
 
 export function HomePokedexPreview() {
   const { roster, add, remove } = useRoster();
@@ -103,14 +114,7 @@ export function HomePokedexPreview() {
 
   function handleQuickAdd(p: { id: number; name: string; type: string }) {
     if (inRoster(p.id) || roster.length >= MAX_ROSTER) return;
-    const summary: PokemonSummary = {
-      id: p.id,
-      name: p.name,
-      types: [p.type as PokemonType],
-      stats: { hp: 50, attack: 50, defense: 50, specialAttack: 50, specialDefense: 50, speed: 50 },
-      sprite: spriteUrl(p.id),
-    };
-    add(summary);
+    add(toSummary(p));
     playCry(cryUrl(p.id));
   }
 
@@ -245,45 +249,29 @@ export function HomePokedexPreview() {
                   viewport={{ once: true, margin: '-80px' }}
                   transition={{ duration: 0.5, delay: Math.min(idx * 0.03, 0.45) }}
                   whileHover={{ y: -6 }}
+                  className="w-44"
                 >
-                  <Tilt
-                    tiltMaxAngleX={10}
-                    tiltMaxAngleY={10}
-                    glareEnable
-                    glareMaxOpacity={0.2}
-                    glareColor="#ffffff"
-                    glarePosition="all"
-                    transitionSpeed={1500}
-                  >
-                    <div className="glass-card w-44 rounded-xl p-3 flex flex-col items-center gap-2 relative overflow-hidden">
-                      <span className="text-[10px] text-white/50 self-start font-mono">
-                        #{padId(p.id)}
-                      </span>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={animatedSpriteUrl(p.id)}
-                        alt={p.name}
-                        className="w-28 h-28 object-contain pointer-events-none select-none"
-                        style={{ imageRendering: 'pixelated' }}
-                        draggable={false}
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).src = spriteUrl(p.id);
-                        }}
-                      />
-                      <span className="capitalize font-semibold text-sm">{p.name}</span>
-                      <TypeBadge type={p.type as PokemonType} />
+                  <HoloCard
+                    pokemon={toSummary(p)}
+                    imageSrc={animatedSpriteUrl(p.id)}
+                    imageStyle={{ imageRendering: 'pixelated' }}
+                    href={`/pokemon/${p.id}`}
+                    onImageError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = spriteUrl(p.id);
+                    }}
+                    footer={
                       <MotionButton
                         whileTap={{ scale: 0.95 }}
                         size="sm"
                         variant={inR ? 'outline' : 'default'}
                         onClick={() => (inR ? remove(p.id) : handleQuickAdd(p))}
                         disabled={!inR && roster.length >= MAX_ROSTER}
-                        className="w-full mt-2"
+                        className="w-full mt-1"
                       >
                         {inR ? 'Remove' : 'Add'}
                       </MotionButton>
-                    </div>
-                  </Tilt>
+                    }
+                  />
                 </motion.div>
               );
             })}

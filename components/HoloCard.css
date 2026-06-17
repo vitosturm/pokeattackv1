@@ -1,0 +1,142 @@
+/* Holographic trading-card effect, inspired by https://poke-holo.simey.me
+   (CSS technique by simeydotme/pokemon-cards-css). Reproduced with our own data.
+
+   Driven entirely by CSS custom properties that the React pointer handler sets:
+     --pointer-x / --pointer-y          0%..100% pointer position over the card
+     --background-x / --background-y    pointer remapped to a tighter range (foil drift)
+     --rotate-x / --rotate-y            3D tilt in deg
+     --pointer-from-center              0..1 distance from center (foil/glare strength)
+     --card-opacity                     0 at rest, 1 while hovered (fades the foil in/out)
+   Per-type accent colours come from --holo-1/2/3 (set inline per card). */
+
+.holo-card-scene {
+  /* Parent provides the perspective so children can rotate in 3D. */
+  perspective: 1000px;
+}
+
+.holo-card {
+  --pointer-x: 50%;
+  --pointer-y: 50%;
+  --background-x: 50%;
+  --background-y: 50%;
+  --rotate-x: 0deg;
+  --rotate-y: 0deg;
+  --pointer-from-center: 0;
+  --card-opacity: 0;
+  /* Sensible rainbow fallback if a type doesn't define its own. */
+  --holo-1: #ec9bb6;
+  --holo-2: #ccac6f;
+  --holo-3: #69e4a5;
+
+  position: relative;
+  aspect-ratio: 5 / 7;
+  border-radius: 12px;
+  isolation: isolate;
+  transform-style: preserve-3d;
+  transform: rotateY(var(--rotate-x)) rotateX(var(--rotate-y));
+  transition:
+    transform 0.4s ease,
+    box-shadow 0.4s ease;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  background:
+    linear-gradient(155deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.2)), rgba(18, 18, 28, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px) saturate(1.2);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  overflow: hidden;
+}
+
+.holo-card:hover {
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.6),
+    0 0 40px color-mix(in oklch, var(--holo-2), transparent 55%),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* The holo foil: type-tinted bands that drift with the pointer.
+   color-dodge makes them read as light reflecting off foil rather than a flat wash. */
+.holo-card__shine {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: calc(var(--card-opacity) * 0.85);
+  mix-blend-mode: color-dodge;
+  background-blend-mode: color-dodge, screen;
+  background-image:
+    repeating-linear-gradient(
+      82deg,
+      var(--holo-1) calc(var(--background-x) * 0.02 + 0%),
+      var(--holo-2) 12%,
+      var(--holo-3) 24%,
+      var(--holo-1) 36%
+    ),
+    radial-gradient(
+      farthest-corner circle at var(--pointer-x) var(--pointer-y),
+      rgba(255, 255, 255, 0.7) 5%,
+      rgba(120, 120, 120, 0.3) 40%,
+      rgba(0, 0, 0, 0.6) 120%
+    );
+  background-position:
+    calc(var(--background-x) * 1) calc(var(--background-y) * 1),
+    center;
+  background-size:
+    300% 300%,
+    200% 200%;
+  filter: brightness(0.9) contrast(1.4) saturate(1.3);
+}
+
+/* Sparkle/grain layer — a tiny inline SVG noise, blended with exclusion.
+   Strength rises toward the edges (pointer-from-center). */
+.holo-card__sparkle {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: calc(var(--card-opacity) * var(--pointer-from-center) * 0.6);
+  mix-blend-mode: color-dodge;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  background-position: var(--background-x) var(--background-y);
+}
+
+/* The glare: a bright soft highlight tracking the pointer. */
+.holo-card__glare {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: calc(var(--card-opacity) * 0.7);
+  mix-blend-mode: overlay;
+  background-image: radial-gradient(
+    farthest-corner circle at var(--pointer-x) var(--pointer-y),
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0.2) 25%,
+    rgba(0, 0, 0, 0) 60%
+  );
+}
+
+/* Card content sits above all the foil layers. */
+.holo-card__content {
+  position: relative;
+  z-index: 5;
+  height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .holo-card {
+    transform: none !important;
+    transition: none;
+  }
+  .holo-card__shine,
+  .holo-card__sparkle,
+  .holo-card__glare {
+    display: none;
+  }
+}
