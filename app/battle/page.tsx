@@ -13,6 +13,7 @@ import { submitScore } from '@/app/actions/leaderboard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { SiteNav } from '@/components/SiteNav';
+import '@/components/glass-card.css';
 
 type Phase = 'pick' | 'loading' | 'fight' | 'over';
 
@@ -33,6 +34,7 @@ export default function BattlePage() {
   const [bundle, setBundle] = useState<LoadedBundle | null>(null);
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [lastResult, setLastResult] = useState<{
     score: number;
     wins: number;
@@ -105,17 +107,15 @@ export default function BattlePage() {
     }
   }
 
-  async function onOver(result: {
+  async function saveScore(result: {
     score: number;
     wins: number;
     battles: number;
     winner: 'player' | 'opponent';
   }) {
-    setLastResult(result);
-    setPhase('over');
     const trimmed = name.trim();
     if (!trimmed) {
-      toast('Enter a name above to save your score.');
+      toast('Enter a name to save your score.');
       return;
     }
     setBusy(true);
@@ -124,6 +124,7 @@ export default function BattlePage() {
     const res = await submitScore({ playerName: trimmed, ...payload });
     setBusy(false);
     if (res.ok) {
+      setSaved(true);
       toast.success('Score saved!');
     } else {
       localStorage.setItem(
@@ -134,11 +135,28 @@ export default function BattlePage() {
     }
   }
 
+  async function onOver(result: {
+    score: number;
+    wins: number;
+    battles: number;
+    winner: 'player' | 'opponent';
+  }) {
+    setLastResult(result);
+    setSaved(false);
+    setPhase('over');
+    // Auto-save only if a name was already entered before the battle ended.
+    // Otherwise the over-screen shows a name field + Save button.
+    if (name.trim()) {
+      await saveScore(result);
+    }
+  }
+
   function rematch() {
     setPicked(new Set());
     setPickedTouched(false);
     setBundle(null);
     setLastResult(null);
+    setSaved(false);
     setPhase('pick');
   }
 
@@ -221,6 +239,41 @@ export default function BattlePage() {
                 Score: {lastResult.score} · Wins: {lastResult.wins} · Battles: {lastResult.battles}
               </p>
             </div>
+
+            {/* Save-to-leaderboard panel. Shown until the score is saved so the
+                player can always enter a name and submit, even if they didn't
+                type one before the battle ended. */}
+            {!saved ? (
+              <div className="glass-panel rounded-lg p-5 md:col-span-2 max-w-md mx-auto w-full">
+                <p className="text-sm text-white/70 mb-3 text-center">
+                  Enter a name to save your score to the leaderboard.
+                </p>
+                <form
+                  className="flex gap-2"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    void saveScore(lastResult);
+                  }}
+                >
+                  <Input
+                    placeholder="Your name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    maxLength={24}
+                    disabled={busy}
+                    autoFocus
+                  />
+                  <Button type="submit" disabled={busy || !name.trim()}>
+                    {busy ? 'Saving…' : 'Save score'}
+                  </Button>
+                </form>
+              </div>
+            ) : (
+              <p className="md:col-span-2 text-center text-green-400 text-sm">
+                ✓ Score saved to the leaderboard.
+              </p>
+            )}
+
             <div className="md:col-span-2 flex justify-center gap-3">
               <Button onClick={rematch}>Rematch</Button>
               <Button variant="ghost" onClick={() => router.push('/leaderboard')}>
