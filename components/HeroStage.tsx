@@ -5,8 +5,16 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import './HeroStage.css';
 import './SiteNav.css';
+import { HeroTeamPanel } from './HeroTeamPanel';
+import { HeroLeaderboardPanel } from './HeroLeaderboardPanel';
+import type { LeaderboardRow, LeaderboardSummary } from '@/app/actions/leaderboard';
 
-export function HeroStage() {
+interface HeroStageProps {
+  topRows: LeaderboardRow[];
+  summary: LeaderboardSummary;
+}
+
+export function HeroStage({ topRows, summary }: HeroStageProps) {
   const router = useRouter();
   const [launching, setLaunching] = useState(false);
   const triggeredRef = useRef(false);
@@ -43,29 +51,7 @@ export function HeroStage() {
       {/* Stage */}
       <div className="stage">
         <div className="stage-left">
-          <span className="gb-led" />
-          <div className="gb-screen">
-            <div className="panel-head">
-              <span className="dot-status" />
-              <span>Mission · Vol.01 — 2026</span>
-            </div>
-            <h2>
-              Train.
-              <br />
-              Battle.
-              <br />
-              <em>Conquer.</em>
-            </h2>
-            <p>Build a team of three. Master 18 types. Climb the board.</p>
-            <div className="cta-row">
-              <button className="btn primary" onClick={() => router.push('/battle')}>
-                Start →
-              </button>
-              <button className="btn ghost" onClick={() => router.push('/pokedex')}>
-                Pokedex
-              </button>
-            </div>
-          </div>
+          <HeroTeamPanel />
         </div>
 
         <div className="center-stage">
@@ -93,40 +79,7 @@ export function HeroStage() {
         </div>
 
         <div className="stage-right">
-          <span className="gb-led" />
-          <div className="gb-screen">
-            <div className="panel-head">
-              <span>Leaderboard · Live ranking</span>
-              <span className="dot-status red" />
-            </div>
-            <h2>
-              151
-              <br />
-              Pokémon.
-              <br />
-              <em>Endless</em>
-              <br />
-              battles.
-            </h2>
-            <div className="stat-grid">
-              <div className="stat">
-                <div className="stat-num">18</div>
-                <div className="stat-lbl">Types</div>
-              </div>
-              <div className="stat">
-                <div className="stat-num">3v3</div>
-                <div className="stat-lbl">Battles</div>
-              </div>
-              <div className="stat">
-                <div className="stat-num">∞</div>
-                <div className="stat-lbl">Replays</div>
-              </div>
-            </div>
-            <div className="live-row">
-              <span>Live now</span>
-              <span className="pulse-dot" />
-            </div>
-          </div>
+          <HeroLeaderboardPanel topRows={topRows} summary={summary} />
         </div>
       </div>
     </div>

@@ -35,3 +35,17 @@ export async function getTopScores(limit = 50): Promise<LeaderboardRow[]> {
     take,
   });
 }
+
+export interface LeaderboardSummary {
+  players: number;
+  battles: number;
+}
+
+/** Aggregate counters for the hero "Live Leaderboard" panel. */
+export async function getLeaderboardSummary(): Promise<LeaderboardSummary> {
+  const [players, agg] = await Promise.all([
+    prisma.leaderboard.count(),
+    prisma.leaderboard.aggregate({ _sum: { battles: true } }),
+  ]);
+  return { players, battles: agg._sum.battles ?? 0 };
+}
