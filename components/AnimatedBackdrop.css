@@ -78,9 +78,6 @@
 .animated-backdrop .flashes-layer {
   z-index: 7;
 }
-.animated-backdrop .pops-layer {
-  z-index: 10;
-}
 
 /* ============== CARDS ============== */
 .animated-backdrop .card {
@@ -160,7 +157,7 @@
   }
 }
 
-/* ============== TYPE COLORS (shared by .card and .pop-card) ============== */
+/* ============== TYPE COLORS ============== */
 .animated-backdrop .t-fire {
   background: linear-gradient(160deg, #ff8a40, #c1272d);
 }
@@ -489,59 +486,6 @@
   100% {
     opacity: 0;
   }
-}
-
-/* ============== SCROLL-TRIGGERED POP-UP CARD ============== */
-@keyframes pop-card {
-  0% {
-    transform: translate(-50%, -50%) scale(0) rotate(-20deg);
-    opacity: 0;
-  }
-  25% {
-    transform: translate(-50%, -50%) scale(1.15) rotate(8deg);
-    opacity: 1;
-  }
-  60% {
-    transform: translate(-50%, -50%) scale(1) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(0.7) rotate(0deg);
-    opacity: 0;
-  }
-}
-.animated-backdrop .pop-card {
-  position: absolute;
-  pointer-events: none;
-  width: 140px;
-  aspect-ratio: 2/3;
-  border-radius: 14px;
-  padding: 8px;
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  box-shadow:
-    0 20px 50px rgba(0, 0, 0, 0.6),
-    0 0 40px rgba(255, 255, 255, 0.25);
-  animation: pop-card 2.5s ease-out forwards;
-  display: flex;
-  flex-direction: column;
-}
-.animated-backdrop .pop-card img {
-  width: 100%;
-  flex: 1;
-  object-fit: contain;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.6));
-}
-.animated-backdrop .pop-card .num {
-  font-size: 7px;
-  color: rgba(255, 255, 255, 0.95);
-  font-family: monospace;
-}
-.animated-backdrop .pop-card .name {
-  font-size: 12px;
-  color: white;
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
 /* ============== A11Y + PERF GUARDS ============== */

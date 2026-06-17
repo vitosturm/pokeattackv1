@@ -106,7 +106,6 @@ export function AnimatedBackdrop() {
   const ripplesRef = useRef<HTMLDivElement | null>(null);
   const sparklesRef = useRef<HTMLDivElement | null>(null);
   const flashesRef = useRef<HTMLDivElement | null>(null);
-  const popsRef = useRef<HTMLDivElement | null>(null);
 
   // Layout cards once on client mount (SSR has empty placeholders to avoid hydration mismatch)
   const layout = useMemo(() => {
@@ -358,14 +357,13 @@ export function AnimatedBackdrop() {
     };
   }, [isClient]);
 
-  // Scroll + cursor driven layer transforms; pop-up cards every 500px
+  // Scroll + cursor driven layer transforms
   useEffect(() => {
     if (!isClient) return;
     const back = backRef.current;
     const mid = midRef.current;
     const front = frontRef.current;
-    const pops = popsRef.current;
-    if (!back || !mid || !front || !pops) return;
+    if (!back || !mid || !front) return;
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return;
@@ -378,7 +376,6 @@ export function AnimatedBackdrop() {
     let smoothMouseY = 0;
     let lastScrollY = 0;
     let smoothScrollVel = 0;
-    let lastPopAt = 0;
 
     const onScroll = () => {
       scrollY = window.scrollY;
@@ -398,28 +395,6 @@ export function AnimatedBackdrop() {
       el.style.transform = `translate(${tx}px, ${ty + tyExtra}px) rotate(${rot}deg)`;
     }
 
-    function spawnPopCard() {
-      const p = FEATURED_POKEMON[Math.floor(Math.random() * FEATURED_POKEMON.length)];
-      const el = document.createElement('div');
-      el.className = `pop-card t-${p.type}`;
-      el.style.left = window.innerWidth / 2 + 'px';
-      el.style.top = window.innerHeight / 2 + 'px';
-      const num = document.createElement('div');
-      num.className = 'num';
-      num.textContent = '#' + padId(p.id);
-      const img = document.createElement('img');
-      img.src = spriteUrl(p.id);
-      img.alt = '';
-      const name = document.createElement('div');
-      name.className = 'name';
-      name.textContent = p.name;
-      el.appendChild(num);
-      el.appendChild(img);
-      el.appendChild(name);
-      pops!.appendChild(el);
-      setTimeout(() => el.remove(), 2500);
-    }
-
     let raf = 0;
     function loop() {
       smoothMouseX += (mouseX - smoothMouseX) * 0.08;
@@ -430,10 +405,6 @@ export function AnimatedBackdrop() {
       applyTo(back!, -0.15, 4, 12);
       applyTo(mid!, -0.4, -6, 28);
       applyTo(front!, -0.7, 8, 50);
-      if (scrollY > lastPopAt + 500) {
-        lastPopAt = scrollY;
-        spawnPopCard();
-      }
       raf = requestAnimationFrame(loop);
     }
     raf = requestAnimationFrame(loop);
@@ -518,7 +489,6 @@ export function AnimatedBackdrop() {
       <div className="layer bounce-layer" ref={bounceRef} />
       <div className="layer ripples-layer" ref={ripplesRef} />
       <div className="layer flashes-layer" ref={flashesRef} />
-      <div className="layer pops-layer" ref={popsRef} />
     </div>
   );
 }
