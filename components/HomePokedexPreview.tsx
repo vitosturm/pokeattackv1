@@ -124,7 +124,7 @@ export function HomePokedexPreview() {
   const canScrollRight = hasOverflow && progress < 0.999;
 
   return (
-    <section className="relative z-30 pt-0 pb-20 px-6 max-w-6xl mx-auto -mt-40 md:-mt-32">
+    <section className="relative z-30 pt-0 pb-20 px-11 -mt-40 md:-mt-32">
       <header className="flex items-end justify-between mb-8">
         <div>
           <motion.h2
@@ -230,7 +230,7 @@ export function HomePokedexPreview() {
         <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-[#0a0a0f] to-transparent z-[1]" />
         <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-[#0a0a0f] to-transparent z-[1]" />
 
-        <div ref={viewportRef} className="overflow-hidden px-6">
+        <div ref={viewportRef} className="overflow-hidden">
           <motion.div
             ref={trackRef}
             className="grid grid-flow-col gap-4 cursor-grab active:cursor-grabbing"
