@@ -1,18 +1,16 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import Link from 'next/link';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { TypeBadge } from '@/components/TypeBadge';
+import { HoloCard } from '@/components/HoloCard';
 import { TYPES, type PokemonType } from '@/lib/type-chart';
 import { useRoster, MAX_ROSTER } from '@/hooks/useRoster';
 import { useSound } from '@/hooks/useSound';
 import { cryUrl } from '@/lib/pokeapi';
-import { padId } from '@/lib/utils';
 import type { PokemonSummary } from '@/lib/types';
-import './glass-card.css';
 
 interface Props {
   all: PokemonSummary[];
@@ -97,38 +95,23 @@ export function PokedexGrid({ all }: Props) {
         {filtered.map((p) => {
           const inRoster = rosterIds.has(p.id);
           return (
-            <div
+            <HoloCard
               key={p.id}
-              className="glass-card relative overflow-hidden rounded-xl p-3 flex flex-col items-center gap-2"
-            >
-              <Link href={`/pokemon/${p.id}`} className="contents">
-                <span className="text-[10px] text-white/50 self-start font-mono">
-                  #{padId(p.id)}
-                </span>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={p.sprite}
-                  alt={p.name}
-                  className="w-24 h-24 object-contain"
-                  loading="lazy"
-                />
-                <span className="capitalize font-semibold text-sm">{p.name}</span>
-                <div className="flex gap-1 flex-wrap justify-center">
-                  {p.types.map((t) => (
-                    <TypeBadge key={t} type={t} />
-                  ))}
-                </div>
-              </Link>
-              <Button
-                size="sm"
-                variant={inRoster ? 'outline' : 'default'}
-                disabled={!inRoster && roster.length >= MAX_ROSTER}
-                onClick={() => (inRoster ? remove(p.id) : handleAdd(p))}
-                className="w-full mt-1"
-              >
-                {inRoster ? 'Remove' : 'Add'}
-              </Button>
-            </div>
+              pokemon={p}
+              imageSrc={p.sprite}
+              href={`/pokemon/${p.id}`}
+              footer={
+                <Button
+                  size="sm"
+                  variant={inRoster ? 'outline' : 'default'}
+                  disabled={!inRoster && roster.length >= MAX_ROSTER}
+                  onClick={() => (inRoster ? remove(p.id) : handleAdd(p))}
+                  className="w-full mt-1"
+                >
+                  {inRoster ? 'Remove' : 'Add'}
+                </Button>
+              }
+            />
           );
         })}
       </div>

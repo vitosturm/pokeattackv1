@@ -266,6 +266,9 @@ export function HomePokedexPreview() {
                         size="sm"
                         variant={inR ? 'outline' : 'default'}
                         onClick={() => (inR ? remove(p.id) : handleQuickAdd(p))}
+                        // Stop the press from starting the carousel drag, which would
+                        // otherwise swallow the click on this button.
+                        onPointerDownCapture={(e) => e.stopPropagation()}
                         disabled={!inR && roster.length >= MAX_ROSTER}
                         className="w-full mt-1"
                       >
