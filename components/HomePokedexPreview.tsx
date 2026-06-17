@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { motion, useMotionValue } from 'framer-motion';
+import { AnimatePresence, motion, useMotionValue } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { FEATURED_POKEMON } from '@/lib/featured-pokemon';
 import { animatedSpriteUrl, cryUrl, spriteUrl } from '@/lib/pokeapi';
@@ -226,10 +226,6 @@ export function HomePokedexPreview() {
           <ChevronRight size={20} />
         </motion.button>
 
-        {/* Edge fades */}
-        <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-[#0a0a0f] to-transparent z-[1]" />
-        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-[#0a0a0f] to-transparent z-[1]" />
-
         <div ref={viewportRef} className="overflow-hidden">
           <motion.div
             ref={trackRef}
@@ -240,45 +236,53 @@ export function HomePokedexPreview() {
             dragElastic={0.12}
             dragTransition={{ bounceStiffness: 240, bounceDamping: 22 }}
           >
-            {visible.map((p, idx) => {
-              const inR = inRoster(p.id);
-              return (
-                <motion.div
-                  key={p.id}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-80px' }}
-                  transition={{ duration: 0.5, delay: Math.min(idx * 0.03, 0.45) }}
-                  whileHover={{ y: -6 }}
-                  className="w-44"
-                >
-                  <HoloCard
-                    pokemon={toSummary(p)}
-                    imageSrc={animatedSpriteUrl(p.id)}
-                    imageStyle={{ imageRendering: 'pixelated' }}
-                    href={`/pokemon/${p.id}`}
-                    onImageError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = spriteUrl(p.id);
+            <AnimatePresence mode="popLayout" initial={false}>
+              {visible.map((p, idx) => {
+                const inR = inRoster(p.id);
+                return (
+                  <motion.div
+                    key={p.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 380,
+                      damping: 30,
+                      delay: Math.min(idx * 0.025, 0.3),
                     }}
-                    footer={
-                      <MotionButton
-                        whileTap={{ scale: 0.95 }}
-                        size="sm"
-                        variant={inR ? 'outline' : 'default'}
-                        onClick={() => (inR ? remove(p.id) : handleQuickAdd(p))}
-                        // Stop the press from starting the carousel drag, which would
-                        // otherwise swallow the click on this button.
-                        onPointerDownCapture={(e) => e.stopPropagation()}
-                        disabled={!inR && roster.length >= MAX_ROSTER}
-                        className="w-full mt-1"
-                      >
-                        {inR ? 'Remove' : 'Add'}
-                      </MotionButton>
-                    }
-                  />
-                </motion.div>
-              );
-            })}
+                    whileHover={{ y: -6 }}
+                    className="w-44"
+                  >
+                    <HoloCard
+                      pokemon={toSummary(p)}
+                      imageSrc={animatedSpriteUrl(p.id)}
+                      imageStyle={{ imageRendering: 'pixelated' }}
+                      href={`/pokemon/${p.id}`}
+                      onImageError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = spriteUrl(p.id);
+                      }}
+                      footer={
+                        <MotionButton
+                          whileTap={{ scale: 0.95 }}
+                          size="sm"
+                          variant={inR ? 'outline' : 'default'}
+                          onClick={() => (inR ? remove(p.id) : handleQuickAdd(p))}
+                          // Stop the press from starting the carousel drag, which would
+                          // otherwise swallow the click on this button.
+                          onPointerDownCapture={(e) => e.stopPropagation()}
+                          disabled={!inR && roster.length >= MAX_ROSTER}
+                          className="w-full mt-1"
+                        >
+                          {inR ? 'Remove' : 'Add'}
+                        </MotionButton>
+                      }
+                    />
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </motion.div>
         </div>
 
