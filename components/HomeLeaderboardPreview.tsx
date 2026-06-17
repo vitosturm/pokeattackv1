@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getTopScores } from '@/app/actions/leaderboard';
+import './glass-card.css';
 
 export async function HomeLeaderboardPreview() {
   let rows: Awaited<ReturnType<typeof getTopScores>> = [];
@@ -37,7 +38,7 @@ export async function HomeLeaderboardPreview() {
       </header>
 
       {rows.length === 0 ? (
-        <div className="bg-[#14141f] border border-white/10 rounded-lg py-12 text-center">
+        <div className="glass-panel rounded-lg py-12 text-center">
           <p className="text-white/70 mb-3">No scores yet — be the first to claim #1.</p>
           <Link
             href="/battle"
@@ -50,10 +51,7 @@ export async function HomeLeaderboardPreview() {
       ) : (
         <div className="grid gap-2">
           {rows.map((r, i) => (
-            <div
-              key={r.id}
-              className="bg-[#14141f] border border-white/10 rounded-lg p-4 flex items-center gap-4"
-            >
+            <div key={r.id} className="glass-panel rounded-lg p-4 flex items-center gap-4">
               <span
                 className="text-2xl w-10 text-center"
                 style={{

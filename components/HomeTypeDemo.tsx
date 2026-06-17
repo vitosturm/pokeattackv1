@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { TYPES, typeMultiplier, type PokemonType } from '@/lib/type-chart';
 import { TypeBadge } from '@/components/TypeBadge';
+import './glass-card.css';
 
 export function HomeTypeDemo() {
   const [attacker, setAttacker] = useState<PokemonType>('fire');
@@ -84,7 +85,7 @@ export function HomeTypeDemo() {
 
 function Bucket({ label, types, accent }: { label: string; types: PokemonType[]; accent: string }) {
   return (
-    <div className="bg-[#14141f] border border-white/10 rounded-lg p-4">
+    <div className="glass-panel rounded-lg p-4">
       <p
         className={`text-[10px] uppercase mb-3 ${accent}`}
         style={{ fontFamily: '"Press Start 2P", monospace', letterSpacing: '0.12em' }}

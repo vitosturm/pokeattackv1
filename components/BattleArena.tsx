@@ -10,6 +10,7 @@ import { MoveButton } from './MoveButton';
 import { TypeParticles } from './TypeParticles';
 import { ConfettiOnWin } from './ConfettiOnWin';
 import { Button } from '@/components/ui/button';
+import './glass-card.css';
 
 interface Props {
   team: PokemonSummary[];
@@ -90,7 +91,7 @@ export function BattleArena({ team, opponents, playerMoves, opponentMoves, onOve
       <ConfettiOnWin trigger={state.over && state.winner === 'player'} />
       <TypeParticles trigger={particles} type={particleType} />
 
-      <div className="bg-[#14141f] p-4 rounded-lg border border-white/10">
+      <div className="glass-panel p-4 rounded-lg">
         <p className="text-xs text-white/60 mb-1">Opponent</p>
         <h2 className="capitalize">{oppMon.name}</h2>
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -107,7 +108,7 @@ export function BattleArena({ team, opponents, playerMoves, opponentMoves, onOve
         </div>
       </div>
 
-      <div className="bg-[#14141f] p-4 rounded-lg border border-white/10">
+      <div className="glass-panel p-4 rounded-lg">
         <p className="text-xs text-white/60 mb-1">You</p>
         <h2 className="capitalize">{playerMon.name}</h2>
         {/* eslint-disable-next-line @next/next/no-img-element */}

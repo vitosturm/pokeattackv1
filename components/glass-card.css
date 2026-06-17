@@ -2,6 +2,28 @@
    Base: white-tinted glass over the animated backdrop.
    Hover: conic-gradient sweeps across the card like a TCG holo finish. */
 
+/* glass-panel: the quiet sibling of glass-card. Same glass base + border so
+   static surfaces (leaderboard rows, type-effectiveness buckets, battle stat
+   boxes) share the same look as the cards — but without the hover holo sweep,
+   which would be distracting on non-interactive panels. Replaces the old flat
+   bg-[#14141f] boxes. */
+.glass-panel {
+  background:
+    linear-gradient(
+      155deg,
+      rgba(255, 255, 255, 0.06),
+      rgba(255, 255, 255, 0.025) 60%,
+      rgba(0, 0, 0, 0.18)
+    ),
+    rgba(20, 20, 30, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
 .glass-card {
   background:
     linear-gradient(
