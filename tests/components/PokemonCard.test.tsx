@@ -13,10 +13,18 @@ const p: PokemonSummary = {
 };
 
 describe('PokemonCard', () => {
-  it('renders name, id and type', () => {
+  it('renders the real TCG card photo with its stats', () => {
     render(<PokemonCard pokemon={p} />);
+    expect(screen.getByAltText(/pikachu/i)).toBeInTheDocument();
+    expect(screen.getByText('55')).toBeInTheDocument();
+    expect(screen.getByText('40')).toBeInTheDocument();
+    expect(screen.getByText('90')).toBeInTheDocument();
+  });
+
+  it('falls back to the sprite-frame layout when the TCG card has no mapping', () => {
+    render(<PokemonCard pokemon={{ ...p, id: 9999 }} />);
     expect(screen.getByText(/pikachu/i)).toBeInTheDocument();
-    expect(screen.getByText(/#025/)).toBeInTheDocument();
+    expect(screen.getByText(/#9999/)).toBeInTheDocument();
     expect(screen.getByText(/electric/i)).toBeInTheDocument();
   });
 

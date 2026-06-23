@@ -10,6 +10,7 @@ import { TYPES, type PokemonType } from '@/lib/type-chart';
 import { useRoster, MAX_ROSTER } from '@/hooks/useRoster';
 import { useSound } from '@/hooks/useSound';
 import { cryUrl } from '@/lib/pokeapi';
+import { TCG_CARD_IMAGE } from '@/lib/tcg-cards';
 import type { PokemonSummary } from '@/lib/types';
 
 interface Props {
@@ -99,6 +100,7 @@ export function PokedexGrid({ all }: Props) {
               key={p.id}
               pokemon={p}
               imageSrc={p.sprite}
+              tcgImageUrl={TCG_CARD_IMAGE[p.id]}
               href={`/pokemon/${p.id}`}
               footer={
                 <Button
