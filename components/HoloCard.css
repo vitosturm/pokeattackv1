@@ -393,3 +393,26 @@
     animation: none;
   }
 }
+
+/* ─── TCG full-bleed image mode ─────────────────────────────────────────── */
+/* Removes the custom gradient/border so the real card photo fills the frame.
+   Holo effects (shine/sparkle/glare) still overlay at z-index 2-4, blending
+   directly with the card image via color-dodge / overlay. */
+.holo-card--tcg {
+  background: transparent;
+  border: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.holo-card__tcg-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* fill stretches to exact card proportions (TCG images are already 5:7) */
+  object-fit: fill;
+  z-index: 1;
+  pointer-events: none;
+  user-select: none;
+}

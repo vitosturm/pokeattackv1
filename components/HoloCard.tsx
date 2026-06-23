@@ -152,46 +152,11 @@ export function HoloCard({
 
   const showTcgCard = Boolean(tcgImageUrl) && !tcgImageFailed;
 
-  const tcgCardContent = (
-    <div className="flex flex-col gap-1.5 h-full p-2">
-      <div className="relative flex-1 min-h-0">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={tcgImageUrl}
-          alt={pokemon.name}
-          className="w-full h-full object-contain pointer-events-none select-none"
-          draggable={false}
-          loading="lazy"
-          onError={() => setTcgImageFailed(true)}
-        />
-      </div>
-      <dl className="grid grid-cols-3 gap-1 text-center">
-        {STAT_ROWS.map(({ label, key }) => (
-          <div key={key} className="rounded bg-white/10 py-0.5">
-            <dt
-              className="text-[8px] uppercase text-white/70 leading-none"
-              style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
-            >
-              {label}
-            </dt>
-            <dd
-              className="text-xs font-bold tabular-nums text-white"
-              style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
-            >
-              {pokemon.stats[key]}
-            </dd>
-          </div>
-        ))}
-      </dl>
-      {footer}
-    </div>
-  );
-
   return (
     <div className={`holo-card-scene ${className ?? ''}`} style={{ perspective: '600px' }}>
       <div
         ref={ref}
-        className={`holo-card holo-card--${rarity}`}
+        className={`holo-card holo-card--${rarity}${showTcgCard ? ' holo-card--tcg' : ''}`}
         style={{
           ...styleVars,
           ...(rarity === 'cosmos' ? ({ '--cosmosbg': cosmosBg } as React.CSSProperties) : {}),
@@ -199,67 +164,75 @@ export function HoloCard({
         onPointerMove={handleMove}
         onPointerLeave={handleLeave}
       >
+        {showTcgCard && (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={tcgImageUrl}
+            alt={pokemon.name}
+            className="holo-card__tcg-image"
+            draggable={false}
+            loading="lazy"
+            onError={() => setTcgImageFailed(true)}
+          />
+        )}
+
         <div className="holo-card__shine" />
         <div className="holo-card__sparkle" />
         <div className="holo-card__glare" />
 
-        <div className="holo-card__content flex flex-col gap-1.5 p-3">
-          {showTcgCard ? (
-            tcgCardContent
-          ) : (
-            <>
-              {/* Header: name + HP */}
-              <div className="flex items-baseline justify-between gap-2">
-                {href ? (
-                  <Link href={href} className="hover:underline">
-                    {name}
-                  </Link>
-                ) : (
-                  name
-                )}
-                <span
-                  className="text-[10px] font-bold text-white/80 whitespace-nowrap"
-                  style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
-                >
-                  HP {pokemon.stats.hp}
-                </span>
-              </div>
+        {!showTcgCard && (
+          <div className="holo-card__content flex flex-col gap-1.5 p-3">
+            {/* Header: name + HP */}
+            <div className="flex items-baseline justify-between gap-2">
+              {href ? (
+                <Link href={href} className="hover:underline">
+                  {name}
+                </Link>
+              ) : (
+                name
+              )}
+              <span
+                className="text-[10px] font-bold text-white/80 whitespace-nowrap"
+                style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
+              >
+                HP {pokemon.stats.hp}
+              </span>
+            </div>
 
-              {/* Framed artwork */}
-              <div className="relative rounded-md overflow-hidden border border-white/15 bg-black/20 aspect-square">
-                {href ? (
-                  <Link href={href} className="block w-full h-full">
-                    {image}
-                  </Link>
-                ) : (
-                  image
-                )}
-                <span className="absolute top-1 left-1 text-[9px] text-white/60 font-mono">
-                  #{padId(pokemon.id)}
-                </span>
-              </div>
+            {/* Framed artwork */}
+            <div className="relative rounded-md overflow-hidden border border-white/15 bg-black/20 aspect-square">
+              {href ? (
+                <Link href={href} className="block w-full h-full">
+                  {image}
+                </Link>
+              ) : (
+                image
+              )}
+              <span className="absolute top-1 left-1 text-[9px] text-white/60 font-mono">
+                #{padId(pokemon.id)}
+              </span>
+            </div>
 
-              {/* Types */}
-              <div className="flex gap-1 flex-wrap">
-                {pokemon.types.map((t) => (
-                  <TypeBadge key={t} type={t} />
-                ))}
-              </div>
+            {/* Types */}
+            <div className="flex gap-1 flex-wrap">
+              {pokemon.types.map((t) => (
+                <TypeBadge key={t} type={t} />
+              ))}
+            </div>
 
-              {/* Stats as "attacks" */}
-              <dl className="grid grid-cols-3 gap-1 text-center">
-                {STAT_ROWS.map(({ label, key }) => (
-                  <div key={key} className="rounded bg-white/5 py-0.5">
-                    <dt className="text-[8px] uppercase text-white/50 leading-none">{label}</dt>
-                    <dd className="text-xs font-bold tabular-nums">{pokemon.stats[key]}</dd>
-                  </div>
-                ))}
-              </dl>
+            {/* Stats as "attacks" */}
+            <dl className="grid grid-cols-3 gap-1 text-center">
+              {STAT_ROWS.map(({ label, key }) => (
+                <div key={key} className="rounded bg-white/5 py-0.5">
+                  <dt className="text-[8px] uppercase text-white/50 leading-none">{label}</dt>
+                  <dd className="text-xs font-bold tabular-nums">{pokemon.stats[key]}</dd>
+                </div>
+              ))}
+            </dl>
 
-              {footer}
-            </>
-          )}
-        </div>
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );
