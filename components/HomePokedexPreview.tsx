@@ -15,7 +15,7 @@ import { TYPES, type PokemonType } from '@/lib/type-chart';
 import type { PokemonSummary } from '@/lib/types';
 
 const CARD_W = 288; // visual width (18rem card, matches the w-72 class below)
-const CARD_GAP = 16;
+const CARD_GAP = 24; // matches the grid's gap-6 below
 const STEP = CARD_W + CARD_GAP; // distance to scroll per arrow click
 
 // How long the popped-up card stays centered/scaled before retreating and
@@ -206,7 +206,7 @@ export function HomePokedexPreview() {
   const canScrollRight = hasOverflow && progress < 0.999;
 
   return (
-    <section className="relative z-30 pt-0 pb-20 px-11 -mt-40 md:-mt-32">
+    <section className="relative z-30 pt-0 pb-32 px-14 md:px-20 -mt-28 md:-mt-20">
       {/* Backdrop behind a popped-up card — gives the catch its modal-like focus moment. */}
       <AnimatePresence>
         {poppedId !== null && (
@@ -324,7 +324,7 @@ export function HomePokedexPreview() {
         <div ref={viewportRef} className="overflow-hidden">
           <motion.div
             ref={trackRef}
-            className="grid grid-flow-col gap-4 cursor-grab active:cursor-grabbing"
+            className="grid grid-flow-col gap-6 cursor-grab active:cursor-grabbing"
             style={{ x, gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))` }}
             drag="x"
             dragConstraints={dragBounds}

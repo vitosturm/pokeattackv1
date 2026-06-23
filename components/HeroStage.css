@@ -37,11 +37,11 @@
   width: 100%;
   max-width: 320px;
 }
-.stage-left {
-  justify-self: start;
-}
+.stage-left,
 .stage-right {
-  justify-self: end;
+  /* Center each device in its own column so it reads as flanking the
+     pokeball symmetrically, instead of pinning to the outer page edge. */
+  justify-self: center;
 }
 
 .gb-screen {
