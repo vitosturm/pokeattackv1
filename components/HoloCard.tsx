@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, type CSSProperties, type ReactNode } from 'react';
+import { useCallback, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import Link from 'next/link';
 import { padId } from '@/lib/utils';
 import { TypeBadge } from '@/components/TypeBadge';
@@ -42,6 +42,10 @@ interface HoloCardProps {
   pokemon: PokemonSummary;
   /** Image to display in the frame (HD artwork or animated GIF). */
   imageSrc: string;
+  /** Real Pokémon TCG card photo. When set, this replaces the sprite-frame
+   *  layout with a full-bleed card image; falls back to the sprite-frame
+   *  layout if the image fails to load. */
+  tcgImageUrl?: string;
   imageStyle?: CSSProperties;
   onImageError?: (e: React.SyntheticEvent<HTMLImageElement>) => void;
   /** If set, the sprite/name links to the detail page. */
@@ -60,6 +64,7 @@ const STAT_ROWS: { label: string; key: keyof PokemonSummary['stats'] }[] = [
 export function HoloCard({
   pokemon,
   imageSrc,
+  tcgImageUrl,
   imageStyle,
   onImageError,
   href,
@@ -68,6 +73,7 @@ export function HoloCard({
 }: HoloCardProps) {
   const ref = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
+  const [tcgImageFailed, setTcgImageFailed] = useState(false);
 
   const primary = pokemon.types[0];
   const rarity = getRarity(pokemon.stats);
@@ -144,6 +150,43 @@ export function HoloCard({
     </span>
   );
 
+  const showTcgCard = Boolean(tcgImageUrl) && !tcgImageFailed;
+
+  const tcgCardContent = (
+    <div className="flex flex-col gap-1.5 h-full p-2">
+      <div className="relative flex-1 min-h-0">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={tcgImageUrl}
+          alt={pokemon.name}
+          className="w-full h-full object-contain pointer-events-none select-none"
+          draggable={false}
+          loading="lazy"
+          onError={() => setTcgImageFailed(true)}
+        />
+      </div>
+      <dl className="grid grid-cols-3 gap-1 text-center">
+        {STAT_ROWS.map(({ label, key }) => (
+          <div key={key} className="rounded bg-white/10 py-0.5">
+            <dt
+              className="text-[8px] uppercase text-white/70 leading-none"
+              style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
+            >
+              {label}
+            </dt>
+            <dd
+              className="text-xs font-bold tabular-nums text-white"
+              style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
+            >
+              {pokemon.stats[key]}
+            </dd>
+          </div>
+        ))}
+      </dl>
+      {footer}
+    </div>
+  );
+
   return (
     <div className={`holo-card-scene ${className ?? ''}`} style={{ perspective: '600px' }}>
       <div
@@ -161,55 +204,61 @@ export function HoloCard({
         <div className="holo-card__glare" />
 
         <div className="holo-card__content flex flex-col gap-1.5 p-3">
-          {/* Header: name + HP */}
-          <div className="flex items-baseline justify-between gap-2">
-            {href ? (
-              <Link href={href} className="hover:underline">
-                {name}
-              </Link>
-            ) : (
-              name
-            )}
-            <span
-              className="text-[10px] font-bold text-white/80 whitespace-nowrap"
-              style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
-            >
-              HP {pokemon.stats.hp}
-            </span>
-          </div>
-
-          {/* Framed artwork */}
-          <div className="relative rounded-md overflow-hidden border border-white/15 bg-black/20 aspect-square">
-            {href ? (
-              <Link href={href} className="block w-full h-full">
-                {image}
-              </Link>
-            ) : (
-              image
-            )}
-            <span className="absolute top-1 left-1 text-[9px] text-white/60 font-mono">
-              #{padId(pokemon.id)}
-            </span>
-          </div>
-
-          {/* Types */}
-          <div className="flex gap-1 flex-wrap">
-            {pokemon.types.map((t) => (
-              <TypeBadge key={t} type={t} />
-            ))}
-          </div>
-
-          {/* Stats as "attacks" */}
-          <dl className="grid grid-cols-3 gap-1 text-center">
-            {STAT_ROWS.map(({ label, key }) => (
-              <div key={key} className="rounded bg-white/5 py-0.5">
-                <dt className="text-[8px] uppercase text-white/50 leading-none">{label}</dt>
-                <dd className="text-xs font-bold tabular-nums">{pokemon.stats[key]}</dd>
+          {showTcgCard ? (
+            tcgCardContent
+          ) : (
+            <>
+              {/* Header: name + HP */}
+              <div className="flex items-baseline justify-between gap-2">
+                {href ? (
+                  <Link href={href} className="hover:underline">
+                    {name}
+                  </Link>
+                ) : (
+                  name
+                )}
+                <span
+                  className="text-[10px] font-bold text-white/80 whitespace-nowrap"
+                  style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
+                >
+                  HP {pokemon.stats.hp}
+                </span>
               </div>
-            ))}
-          </dl>
 
-          {footer}
+              {/* Framed artwork */}
+              <div className="relative rounded-md overflow-hidden border border-white/15 bg-black/20 aspect-square">
+                {href ? (
+                  <Link href={href} className="block w-full h-full">
+                    {image}
+                  </Link>
+                ) : (
+                  image
+                )}
+                <span className="absolute top-1 left-1 text-[9px] text-white/60 font-mono">
+                  #{padId(pokemon.id)}
+                </span>
+              </div>
+
+              {/* Types */}
+              <div className="flex gap-1 flex-wrap">
+                {pokemon.types.map((t) => (
+                  <TypeBadge key={t} type={t} />
+                ))}
+              </div>
+
+              {/* Stats as "attacks" */}
+              <dl className="grid grid-cols-3 gap-1 text-center">
+                {STAT_ROWS.map(({ label, key }) => (
+                  <div key={key} className="rounded bg-white/5 py-0.5">
+                    <dt className="text-[8px] uppercase text-white/50 leading-none">{label}</dt>
+                    <dd className="text-xs font-bold tabular-nums">{pokemon.stats[key]}</dd>
+                  </div>
+                ))}
+              </dl>
+
+              {footer}
+            </>
+          )}
         </div>
       </div>
     </div>
