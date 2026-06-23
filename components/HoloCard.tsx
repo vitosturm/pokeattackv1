@@ -25,6 +25,19 @@ const HOLO: Partial<Record<PokemonType, [string, string, string]>> = {
   normal: ['#d0d0b0', '#a8a878', '#efefe0'],
 };
 
+type Rarity = 'normal' | 'holo' | 'cosmos';
+
+function getRarity(stats: PokemonSummary['stats']): Rarity {
+  const bst =
+    stats.hp +
+    stats.attack +
+    stats.defense +
+    stats.specialAttack +
+    stats.specialDefense +
+    stats.speed;
+  return bst >= 480 ? 'cosmos' : bst >= 320 ? 'holo' : 'normal';
+}
+
 interface HoloCardProps {
   pokemon: PokemonSummary;
   /** Image to display in the frame (HD artwork or animated GIF). */
@@ -57,6 +70,10 @@ export function HoloCard({
   const rafRef = useRef<number | null>(null);
 
   const primary = pokemon.types[0];
+  const rarity = getRarity(pokemon.stats);
+  // Deterministic per-pokemon cosmos background offset so each card shows a
+  // different part of the galaxy texture without needing Math.random() in render.
+  const cosmosBg = `${(pokemon.id * 137) % 734}px ${(pokemon.id * 251) % 1280}px`;
   const holo = HOLO[primary];
   const styleVars = holo
     ? ({ '--holo-1': holo[0], '--holo-2': holo[1], '--holo-3': holo[2] } as CSSProperties)
@@ -80,9 +97,11 @@ export function HoloCard({
       el.style.setProperty('--pointer-y', `${py}%`);
       el.style.setProperty('--background-x', `${bx}%`);
       el.style.setProperty('--background-y', `${by}%`);
-      el.style.setProperty('--rotate-x', `${-cx / 3.5}deg`);
-      el.style.setProperty('--rotate-y', `${cy / 3.5}deg`);
+      el.style.setProperty('--rotate-x', `${-cx / 2.8}deg`);
+      el.style.setProperty('--rotate-y', `${cy / 2.8}deg`);
       el.style.setProperty('--pointer-from-center', `${fromCenter}`);
+      el.style.setProperty('--pointer-from-left', `${px / 100}`);
+      el.style.setProperty('--pointer-from-top', `${py / 100}`);
       el.style.setProperty('--card-opacity', '1');
     });
   }, []);
@@ -98,6 +117,8 @@ export function HoloCard({
     el.style.setProperty('--rotate-x', '0deg');
     el.style.setProperty('--rotate-y', '0deg');
     el.style.setProperty('--pointer-from-center', '0');
+    el.style.setProperty('--pointer-from-left', '0.5');
+    el.style.setProperty('--pointer-from-top', '0.5');
     el.style.setProperty('--card-opacity', '0');
   }, []);
 
@@ -114,14 +135,24 @@ export function HoloCard({
     />
   );
 
-  const name = <span className="capitalize font-bold text-sm leading-tight">{pokemon.name}</span>;
+  const name = (
+    <span
+      className="capitalize font-bold text-sm leading-tight"
+      style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
+    >
+      {pokemon.name}
+    </span>
+  );
 
   return (
-    <div className={`holo-card-scene ${className ?? ''}`}>
+    <div className={`holo-card-scene ${className ?? ''}`} style={{ perspective: '600px' }}>
       <div
         ref={ref}
-        className="holo-card"
-        style={styleVars}
+        className={`holo-card holo-card--${rarity}`}
+        style={{
+          ...styleVars,
+          ...(rarity === 'cosmos' ? ({ '--cosmosbg': cosmosBg } as React.CSSProperties) : {}),
+        }}
         onPointerMove={handleMove}
         onPointerLeave={handleLeave}
       >
@@ -139,7 +170,10 @@ export function HoloCard({
             ) : (
               name
             )}
-            <span className="text-[10px] font-bold text-white/80 whitespace-nowrap">
+            <span
+              className="text-[10px] font-bold text-white/80 whitespace-nowrap"
+              style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
+            >
               HP {pokemon.stats.hp}
             </span>
           </div>
