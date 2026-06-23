@@ -3,23 +3,24 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { AnimatePresence, motion, useMotionValue } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Plus } from 'lucide-react';
 import { FEATURED_POKEMON } from '@/lib/featured-pokemon';
 import { TCG_CARD_IMAGE } from '@/lib/tcg-cards';
 import { animatedSpriteUrl, cryUrl, spriteUrl } from '@/lib/pokeapi';
 import { useRoster, MAX_ROSTER } from '@/hooks/useRoster';
 import { useSound } from '@/hooks/useSound';
 import { TypeBadge } from '@/components/TypeBadge';
-import { HoloCard } from '@/components/HoloCard';
-import { Button } from '@/components/ui/button';
+import { HoloCard, HOLO } from '@/components/HoloCard';
 import { TYPES, type PokemonType } from '@/lib/type-chart';
 import type { PokemonSummary } from '@/lib/types';
 
-const CARD_W = 180; // visual width (176px card + 4px buffer for shadows/edges)
+const CARD_W = 240; // visual width (236px card + 4px buffer for shadows/edges)
 const CARD_GAP = 16;
 const STEP = CARD_W + CARD_GAP; // distance to scroll per arrow click
 
-const MotionButton = motion.create(Button);
+// How long the popped-up card stays centered/scaled before retreating and
+// closing — gives the user a moment to register the catch.
+const POP_HOLD_MS = 550;
 
 type Featured = (typeof FEATURED_POKEMON)[number];
 
@@ -35,6 +36,58 @@ function toSummary(p: Featured): PokemonSummary {
   };
 }
 
+// Pops a card to the center of the screen and scales it up — the same
+// "catch" interaction as poke-holo.simey.me's click-to-expand, ported to
+// framer-motion springs since we don't have Svelte's spring store here.
+function PoppableCard({
+  isPopped,
+  glow,
+  onComplete,
+  children,
+}: {
+  isPopped: boolean;
+  glow: string;
+  onComplete: () => void;
+  children: React.ReactNode;
+}) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [delta, setDelta] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    if (!isPopped || !ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    setDelta({
+      x: window.innerWidth / 2 - cx,
+      y: window.innerHeight / 2 - cy,
+    });
+  }, [isPopped]);
+
+  return (
+    <motion.div
+      ref={ref}
+      animate={
+        isPopped
+          ? {
+              x: delta.x,
+              y: delta.y,
+              scale: 1.6,
+              boxShadow: `0 0 0 2px white, 0 0 30px 6px ${glow}`,
+            }
+          : { x: 0, y: 0, scale: 1, boxShadow: '0 0 0 0 transparent, 0 0 0 0 transparent' }
+      }
+      transition={{ type: 'spring', stiffness: 120, damping: 14 }}
+      onAnimationComplete={() => {
+        if (isPopped) onComplete();
+      }}
+      className="rounded-xl"
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 export function HomePokedexPreview() {
   const { roster, add, remove } = useRoster();
   const playCry = useSound();
@@ -43,6 +96,10 @@ export function HomePokedexPreview() {
   const [dragBounds, setDragBounds] = useState({ left: 0, right: 0 });
   const [progress, setProgress] = useState(0);
   const [activeType, setActiveType] = useState<PokemonType | null>(null);
+  // The Pokémon currently "popped" to the center of the screen (Simey-style
+  // click interaction). Only one card can be popped at a time.
+  const [poppedId, setPoppedId] = useState<number | null>(null);
+  const toggledRef = useRef(false);
 
   const x = useMotionValue(0);
 
@@ -58,8 +115,8 @@ export function HomePokedexPreview() {
     [activeType],
   );
 
-  // Up to 3 rows; fewer when the filtered set is small so it stays centered.
-  const rows = Math.min(3, Math.max(1, visible.length));
+  // Single row — bigger cards read better than a cramped 3-row grid.
+  const rows = 1;
 
   // Compute drag bounds whenever the layout or the filtered set changes.
   useEffect(() => {
@@ -114,10 +171,34 @@ export function HomePokedexPreview() {
 
   const inRoster = (id: number) => roster.some((p) => p.id === id);
 
-  function handleQuickAdd(p: Featured) {
-    if (inRoster(p.id) || roster.length >= MAX_ROSTER) return;
-    add(toSummary(p));
-    playCry(cryUrl(p.id));
+  // Click-to-add: pop the card to the center of the screen (Simey-style),
+  // toggle it in/out of the roster once the pop animation lands, then retreat.
+  function handleCardClick(p: Featured) {
+    if (poppedId !== null) return; // one card interactive at a time
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) {
+      if (inRoster(p.id)) {
+        remove(p.id);
+      } else if (roster.length < MAX_ROSTER) {
+        add(toSummary(p));
+        playCry(cryUrl(p.id));
+      }
+      return;
+    }
+    toggledRef.current = false;
+    setPoppedId(p.id);
+  }
+
+  function handlePopComplete(p: Featured) {
+    if (toggledRef.current) return; // already retreating, ignore the exit animation
+    toggledRef.current = true;
+    if (inRoster(p.id)) {
+      remove(p.id);
+    } else if (roster.length < MAX_ROSTER) {
+      add(toSummary(p));
+      playCry(cryUrl(p.id));
+    }
+    setTimeout(() => setPoppedId(null), POP_HOLD_MS);
   }
 
   const hasOverflow = dragBounds.left < 0;
@@ -126,6 +207,19 @@ export function HomePokedexPreview() {
 
   return (
     <section className="relative z-30 pt-0 pb-20 px-11 -mt-40 md:-mt-32">
+      {/* Backdrop behind a popped-up card — gives the catch its modal-like focus moment. */}
+      <AnimatePresence>
+        {poppedId !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 bg-black/60"
+            onClick={() => setPoppedId(null)}
+          />
+        )}
+      </AnimatePresence>
+
       <header className="flex items-end justify-between mb-8">
         <div>
           <motion.h2
@@ -240,6 +334,8 @@ export function HomePokedexPreview() {
             <AnimatePresence mode="popLayout" initial={false}>
               {visible.map((p, idx) => {
                 const inR = inRoster(p.id);
+                const isPopped = poppedId === p.id;
+                const glow = HOLO[p.type as PokemonType]?.[1] ?? '#ff3860';
                 return (
                   <motion.div
                     key={p.id}
@@ -253,34 +349,46 @@ export function HomePokedexPreview() {
                       damping: 30,
                       delay: Math.min(idx * 0.025, 0.3),
                     }}
-                    whileHover={{ y: -6 }}
-                    className="w-44"
+                    whileHover={isPopped ? undefined : { y: -6 }}
+                    className="w-60 relative"
+                    style={{ zIndex: isPopped ? 50 : 'auto' }}
                   >
-                    <HoloCard
-                      pokemon={toSummary(p)}
-                      imageSrc={animatedSpriteUrl(p.id)}
-                      tcgImageUrl={TCG_CARD_IMAGE[p.id]}
-                      imageStyle={{ imageRendering: 'pixelated' }}
-                      href={`/pokemon/${p.id}`}
-                      onImageError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src = spriteUrl(p.id);
-                      }}
-                      footer={
-                        <MotionButton
-                          whileTap={{ scale: 0.95 }}
-                          size="sm"
-                          variant={inR ? 'outline' : 'default'}
-                          onClick={() => (inR ? remove(p.id) : handleQuickAdd(p))}
-                          // Stop the press from starting the carousel drag, which would
-                          // otherwise swallow the click on this button.
+                    <PoppableCard
+                      isPopped={isPopped}
+                      glow={glow}
+                      onComplete={() => handlePopComplete(p)}
+                    >
+                      <div className="relative">
+                        <Link href={`/pokemon/${p.id}`} className="block">
+                          <HoloCard
+                            pokemon={toSummary(p)}
+                            imageSrc={animatedSpriteUrl(p.id)}
+                            tcgImageUrl={TCG_CARD_IMAGE[p.id]}
+                            imageStyle={{ imageRendering: 'pixelated' }}
+                            onImageError={(e) => {
+                              (e.currentTarget as HTMLImageElement).src = spriteUrl(p.id);
+                            }}
+                          />
+                        </Link>
+                        <button
+                          type="button"
+                          aria-label={`${inR ? 'Remove' : 'Add'} ${p.name}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleCardClick(p);
+                          }}
                           onPointerDownCapture={(e) => e.stopPropagation()}
                           disabled={!inR && roster.length >= MAX_ROSTER}
-                          className="w-full mt-1"
+                          className={`absolute top-2 right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center shadow-lg border transition disabled:opacity-40 disabled:cursor-default ${
+                            inR
+                              ? 'bg-[#ff3860] border-white/40 text-white'
+                              : 'bg-black/70 border-white/30 text-white hover:bg-black/90'
+                          }`}
                         >
-                          {inR ? 'Remove' : 'Add'}
-                        </MotionButton>
-                      }
-                    />
+                          {inR ? <Check size={14} /> : <Plus size={14} />}
+                        </button>
+                      </div>
+                    </PoppableCard>
                   </motion.div>
                 );
               })}

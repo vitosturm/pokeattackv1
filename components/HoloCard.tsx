@@ -10,7 +10,7 @@ import './HoloCard.css';
 
 // Per-type foil accent colours (exposed as --holo-1/2/3). Types not listed fall
 // back to the rainbow defaults defined in HoloCard.css.
-const HOLO: Partial<Record<PokemonType, [string, string, string]>> = {
+export const HOLO: Partial<Record<PokemonType, [string, string, string]>> = {
   fire: ['#ff9a3c', '#ff3860', '#ffd14a'],
   water: ['#5fd0ff', '#3c6bff', '#9be8ff'],
   grass: ['#7be07b', '#2fae6b', '#d6ff7b'],
