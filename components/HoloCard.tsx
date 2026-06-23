@@ -88,6 +88,7 @@ export function HoloCard({
   const handleMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     const el = ref.current;
     if (!el) return;
+    el.classList.add('holo-card--tracking');
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     const rect = el.getBoundingClientRect();
     const px = Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100));
@@ -115,6 +116,7 @@ export function HoloCard({
   const handleLeave = useCallback(() => {
     const el = ref.current;
     if (!el) return;
+    el.classList.remove('holo-card--tracking');
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     el.style.setProperty('--pointer-x', '50%');
     el.style.setProperty('--pointer-y', '50%');

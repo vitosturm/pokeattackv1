@@ -34,9 +34,11 @@
   isolation: isolate;
   transform-style: preserve-3d;
   transform: rotateY(var(--rotate-x)) rotateX(var(--rotate-y));
-  transition:
-    transform 0.4s ease,
-    box-shadow 0.4s ease;
+  /* No transform transition while the pointer is actively tracking (set via
+     the .holo-card--tracking class in HoloCard.tsx) — the tilt should snap
+     1:1 to the pointer every frame. The transition below only applies once
+     tracking stops, easing the card and its foil back to rest. */
+  transition: box-shadow 0.4s ease;
   box-shadow:
     0 10px 30px rgba(0, 0, 0, 0.45),
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
@@ -62,6 +64,18 @@
     0 18px 50px rgba(0, 0, 0, 0.6),
     0 0 40px color-mix(in oklch, var(--holo-2), transparent 55%),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.holo-card:not(.holo-card--tracking) {
+  transition:
+    transform 0.6s ease,
+    box-shadow 0.4s ease;
+}
+
+.holo-card:not(.holo-card--tracking) .holo-card__shine,
+.holo-card:not(.holo-card--tracking) .holo-card__sparkle,
+.holo-card:not(.holo-card--tracking) .holo-card__glare {
+  transition: opacity 0.5s ease-out;
 }
 
 /* The holo foil: type-tinted bands that drift with the pointer.
@@ -270,7 +284,10 @@
 }
 
 .holo-card--cosmos .holo-card__shine {
-  opacity: 1;
+  /* Scales with hover instead of a constant 1 — at full strength this
+     color-dodge layer blows bright TCG card art (e.g. Snorlax's pale
+     background) out to solid white, hiding the artwork underneath. */
+  opacity: calc(0.25 + var(--card-opacity) * 0.45);
   mix-blend-mode: color-dodge;
   animation: cosmos-pulse 10s linear infinite;
   background-image:
@@ -340,7 +357,7 @@
       calc(15% + (var(--pointer-from-top, 0.5) * 70%));
   mix-blend-mode: overlay;
   filter: brightness(1.25) contrast(1.75) saturate(0.8);
-  opacity: calc(var(--card-opacity) * 0.9 + 0.15);
+  opacity: calc(0.1 + var(--card-opacity) * 0.35);
 }
 
 .holo-card--cosmos .holo-card__shine::after {
@@ -374,7 +391,7 @@
       calc(20% + (var(--pointer-from-top, 0.5) * 60%));
   mix-blend-mode: multiply;
   filter: brightness(1.25) contrast(1.75) saturate(0.8);
-  opacity: calc(var(--card-opacity) * 0.85 + 0.1);
+  opacity: calc(0.08 + var(--card-opacity) * 0.3);
 }
 
 .holo-card--cosmos .holo-card__glare {
@@ -385,7 +402,7 @@
   );
   filter: brightness(0.75) contrast(2) saturate(2);
   mix-blend-mode: overlay;
-  opacity: calc(var(--card-opacity) * (0.25 + var(--pointer-from-center, 0)));
+  opacity: calc(var(--card-opacity) * (0.2 + var(--pointer-from-center, 0) * 0.6));
 }
 
 @media (prefers-reduced-motion: reduce) {

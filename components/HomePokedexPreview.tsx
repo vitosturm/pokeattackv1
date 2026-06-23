@@ -14,7 +14,7 @@ import { HoloCard, HOLO } from '@/components/HoloCard';
 import { TYPES, type PokemonType } from '@/lib/type-chart';
 import type { PokemonSummary } from '@/lib/types';
 
-const CARD_W = 240; // visual width (236px card + 4px buffer for shadows/edges)
+const CARD_W = 288; // visual width (18rem card, matches the w-72 class below)
 const CARD_GAP = 16;
 const STEP = CARD_W + CARD_GAP; // distance to scroll per arrow click
 
@@ -115,8 +115,8 @@ export function HomePokedexPreview() {
     [activeType],
   );
 
-  // Single row — bigger cards read better than a cramped 3-row grid.
-  const rows = 1;
+  // Two rows of larger cards — reads better than a single cramped row.
+  const rows = 2;
 
   // Compute drag bounds whenever the layout or the filtered set changes.
   useEffect(() => {
@@ -350,7 +350,7 @@ export function HomePokedexPreview() {
                       delay: Math.min(idx * 0.025, 0.3),
                     }}
                     whileHover={isPopped ? undefined : { y: -6 }}
-                    className="w-60 relative"
+                    className="w-72 relative"
                     style={{ zIndex: isPopped ? 50 : 'auto' }}
                   >
                     <PoppableCard
