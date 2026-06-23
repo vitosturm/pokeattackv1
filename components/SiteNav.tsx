@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { DesignModeSwitch } from './DesignModeSwitch';
 import './SiteNav.css';
 
 export function SiteNav() {
@@ -14,6 +15,7 @@ export function SiteNav() {
           <Link href="/roster">My Pokemons</Link>
           <Link href="/battle">Battle</Link>
           <Link href="/leaderboard">Leaderboard</Link>
+          <DesignModeSwitch />
           <Link href="/battle" className="cta-nav">
             Play now
           </Link>
