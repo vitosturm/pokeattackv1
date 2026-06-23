@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { AnimatePresence, motion, useMotionValue } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { FEATURED_POKEMON } from '@/lib/featured-pokemon';
+import { TCG_CARD_IMAGE } from '@/lib/tcg-cards';
 import { animatedSpriteUrl, cryUrl, spriteUrl } from '@/lib/pokeapi';
 import { useRoster, MAX_ROSTER } from '@/hooks/useRoster';
 import { useSound } from '@/hooks/useSound';
@@ -258,6 +259,7 @@ export function HomePokedexPreview() {
                     <HoloCard
                       pokemon={toSummary(p)}
                       imageSrc={animatedSpriteUrl(p.id)}
+                      tcgImageUrl={TCG_CARD_IMAGE[p.id]}
                       imageStyle={{ imageRendering: 'pixelated' }}
                       href={`/pokemon/${p.id}`}
                       onImageError={(e) => {
