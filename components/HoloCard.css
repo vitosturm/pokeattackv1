@@ -274,7 +274,7 @@
   mix-blend-mode: color-dodge;
   animation: cosmos-pulse 10s linear infinite;
   background-image:
-    url('/img/cosmos-bottom.png'),
+    url('/pokeattack/img/cosmos-bottom.png'),
     repeating-linear-gradient(
       82deg,
       hsl(53, 65%, 60%) calc(4% * 1),
@@ -314,7 +314,7 @@
   position: absolute;
   inset: 0;
   background-image:
-    url('/img/cosmos-middle-trans.png'),
+    url('/pokeattack/img/cosmos-middle-trans.png'),
     repeating-linear-gradient(
       82deg,
       hsl(53, 65%, 60%) calc(4% * 1),
@@ -348,7 +348,7 @@
   position: absolute;
   inset: 0;
   background-image:
-    url('/img/cosmos-top-trans.png'),
+    url('/pokeattack/img/cosmos-top-trans.png'),
     repeating-linear-gradient(
       82deg,
       hsl(53, 65%, 60%) calc(4% * 1),
