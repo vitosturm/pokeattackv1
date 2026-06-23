@@ -3,10 +3,20 @@
 import { useEffect, useRef, useState } from 'react';
 import { BACKGROUND_VIDEOS } from '@/lib/backgroundVideos';
 
+const SESSION_KEY = 'pokeattack:last-bg-idx';
+
+function pickVideoIndex(): number {
+  const last = Number(sessionStorage.getItem(SESSION_KEY) ?? '-1');
+  let idx: number;
+  do {
+    idx = Math.floor(Math.random() * BACKGROUND_VIDEOS.length);
+  } while (BACKGROUND_VIDEOS.length > 1 && idx === last);
+  sessionStorage.setItem(SESSION_KEY, String(idx));
+  return idx;
+}
+
 export function VideoBackdrop() {
-  const [src] = useState(
-    () => BACKGROUND_VIDEOS[Math.floor(Math.random() * BACKGROUND_VIDEOS.length)],
-  );
+  const [src] = useState(() => BACKGROUND_VIDEOS[pickVideoIndex()]);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
