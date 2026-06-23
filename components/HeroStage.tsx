@@ -7,6 +7,7 @@ import './HeroStage.css';
 import './SiteNav.css';
 import { HeroTeamPanel } from './HeroTeamPanel';
 import { HeroLeaderboardPanel } from './HeroLeaderboardPanel';
+import { DesignModeSwitch } from './DesignModeSwitch';
 import type { LeaderboardRow, LeaderboardSummary } from '@/app/actions/leaderboard';
 
 interface HeroStageProps {
@@ -42,6 +43,7 @@ export function HeroStage({ topRows, summary }: HeroStageProps) {
           <Link href="/roster">My Pokemons</Link>
           <Link href="/battle">Battle</Link>
           <Link href="/leaderboard">Leaderboard</Link>
+          <DesignModeSwitch />
           <Link href="/battle" className="cta-nav">
             Play now
           </Link>
