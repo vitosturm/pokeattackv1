@@ -40,7 +40,7 @@ export function HeroStage({ topRows, summary }: HeroStageProps) {
         <div className="nav-items">
           <Link href="/">Home</Link>
           <Link href="/pokedex">Pokedex</Link>
-          <Link href="/roster">My Pokemons</Link>
+          <Link href="/roster">Mypokemons</Link>
           <Link href="/battle">Battle</Link>
           <Link href="/leaderboard">Leaderboard</Link>
           <DesignModeSwitch />

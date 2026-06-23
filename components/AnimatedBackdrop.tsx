@@ -96,7 +96,7 @@ function scatterCards(
   return placed;
 }
 
-export function AnimatedBackdrop() {
+export function AnimatedBackdrop({ ballsOnly = false }: { ballsOnly?: boolean } = {}) {
   const isClient = useIsClient();
   const backRef = useRef<HTMLDivElement | null>(null);
   const midRef = useRef<HTMLDivElement | null>(null);
@@ -109,7 +109,7 @@ export function AnimatedBackdrop() {
 
   // Layout cards once on client mount (SSR has empty placeholders to avoid hydration mismatch)
   const layout = useMemo(() => {
-    if (!isClient) {
+    if (!isClient || ballsOnly) {
       return { back: [] as PlacedCard[], mid: [] as PlacedCard[], front: [] as PlacedCard[] };
     }
     const vpW = window.innerWidth;
@@ -357,9 +357,9 @@ export function AnimatedBackdrop() {
     };
   }, [isClient]);
 
-  // Scroll + cursor driven layer transforms
+  // Scroll + cursor driven layer transforms (only needed for card layers)
   useEffect(() => {
-    if (!isClient) return;
+    if (!isClient || ballsOnly) return;
     const back = backRef.current;
     const mid = midRef.current;
     const front = frontRef.current;
@@ -418,72 +418,76 @@ export function AnimatedBackdrop() {
 
   return (
     <div className="animated-backdrop" aria-hidden="true">
-      <div className="layer layer-back" ref={backRef}>
-        {layout.back.map((c, i) => (
-          <div
-            key={`b${i}`}
-            className={`card t-${c.p.type}`}
-            style={
-              {
-                left: c.x,
-                top: c.y,
-                width: c.w,
-                '--r': `${c.rot}deg`,
-                animationDelay: `${c.delay}s`,
-              } as React.CSSProperties
-            }
-          >
-            <div className="num">#{padId(c.p.id)}</div>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={spriteUrl(c.p.id)} alt="" loading="lazy" />
-            <div className="name">{c.p.name}</div>
+      {!ballsOnly && (
+        <>
+          <div className="layer layer-back" ref={backRef}>
+            {layout.back.map((c, i) => (
+              <div
+                key={`b${i}`}
+                className={`card t-${c.p.type}`}
+                style={
+                  {
+                    left: c.x,
+                    top: c.y,
+                    width: c.w,
+                    '--r': `${c.rot}deg`,
+                    animationDelay: `${c.delay}s`,
+                  } as React.CSSProperties
+                }
+              >
+                <div className="num">#{padId(c.p.id)}</div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={spriteUrl(c.p.id)} alt="" loading="lazy" />
+                <div className="name">{c.p.name}</div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <div className="layer layer-mid" ref={midRef}>
-        {layout.mid.map((c, i) => (
-          <div
-            key={`m${i}`}
-            className={`card t-${c.p.type}`}
-            style={
-              {
-                left: c.x,
-                top: c.y,
-                width: c.w,
-                '--r': `${c.rot}deg`,
-                animationDelay: `${c.delay}s`,
-              } as React.CSSProperties
-            }
-          >
-            <div className="num">#{padId(c.p.id)}</div>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={spriteUrl(c.p.id)} alt="" loading="lazy" />
-            <div className="name">{c.p.name}</div>
+          <div className="layer layer-mid" ref={midRef}>
+            {layout.mid.map((c, i) => (
+              <div
+                key={`m${i}`}
+                className={`card t-${c.p.type}`}
+                style={
+                  {
+                    left: c.x,
+                    top: c.y,
+                    width: c.w,
+                    '--r': `${c.rot}deg`,
+                    animationDelay: `${c.delay}s`,
+                  } as React.CSSProperties
+                }
+              >
+                <div className="num">#{padId(c.p.id)}</div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={spriteUrl(c.p.id)} alt="" loading="lazy" />
+                <div className="name">{c.p.name}</div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <div className="layer layer-front" ref={frontRef}>
-        {layout.front.map((c, i) => (
-          <div
-            key={`f${i}`}
-            className={`card t-${c.p.type}`}
-            style={
-              {
-                left: c.x,
-                top: c.y,
-                width: c.w,
-                '--r': `${c.rot}deg`,
-                animationDelay: `${c.delay}s`,
-              } as React.CSSProperties
-            }
-          >
-            <div className="num">#{padId(c.p.id)}</div>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={spriteUrl(c.p.id)} alt="" loading="lazy" />
-            <div className="name">{c.p.name}</div>
+          <div className="layer layer-front" ref={frontRef}>
+            {layout.front.map((c, i) => (
+              <div
+                key={`f${i}`}
+                className={`card t-${c.p.type}`}
+                style={
+                  {
+                    left: c.x,
+                    top: c.y,
+                    width: c.w,
+                    '--r': `${c.rot}deg`,
+                    animationDelay: `${c.delay}s`,
+                  } as React.CSSProperties
+                }
+              >
+                <div className="num">#{padId(c.p.id)}</div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={spriteUrl(c.p.id)} alt="" loading="lazy" />
+                <div className="name">{c.p.name}</div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
       <div className="layer sparkles-layer" ref={sparklesRef} />
       <div className="layer trails-layer" ref={trailsRef} />
       <div className="layer bounce-layer" ref={bounceRef} />

@@ -6,5 +6,14 @@ import { VideoBackdrop } from './VideoBackdrop';
 
 export function Backdrop() {
   const { mode } = useDesignMode();
-  return mode === 'video' ? <VideoBackdrop /> : <AnimatedBackdrop />;
+  if (mode === 'video') {
+    return (
+      <>
+        <VideoBackdrop />
+        {/* Bouncing pokeballs float on top of the video (z-index -1 > video's -10) */}
+        <AnimatedBackdrop ballsOnly />
+      </>
+    );
+  }
+  return <AnimatedBackdrop />;
 }

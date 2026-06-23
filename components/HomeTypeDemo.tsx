@@ -24,8 +24,8 @@ export function HomeTypeDemo() {
   }
 
   return (
-    <section className="py-20 px-6 bg-gradient-to-b from-transparent via-white/[0.02] to-transparent">
-      <div className="max-w-6xl mx-auto">
+    <section className="py-20 px-14 md:px-20 bg-gradient-to-b from-transparent via-white/[0.02] to-transparent">
+      <div>
         <header className="mb-10">
           <h2
             className="text-4xl mb-2"

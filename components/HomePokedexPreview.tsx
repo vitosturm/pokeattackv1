@@ -321,7 +321,7 @@ export function HomePokedexPreview() {
           <ChevronRight size={20} />
         </motion.button>
 
-        <div ref={viewportRef} className="overflow-hidden">
+        <div ref={viewportRef} className={poppedId === null ? 'overflow-hidden' : ''}>
           <motion.div
             ref={trackRef}
             className="grid grid-flow-col gap-6 cursor-grab active:cursor-grabbing"
@@ -342,7 +342,7 @@ export function HomePokedexPreview() {
                     layout
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
+                    exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.15, delay: 0 } }}
                     transition={{
                       type: 'spring',
                       stiffness: 380,

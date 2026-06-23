@@ -11,7 +11,7 @@ export function DesignModeSwitch() {
       role="group"
       aria-label="Homepage design"
     >
-      {(['classic', 'video'] as const).map((m) => (
+      {(['video', 'classic'] as const).map((m) => (
         <button
           key={m}
           type="button"

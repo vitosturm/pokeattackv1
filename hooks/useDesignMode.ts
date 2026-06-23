@@ -11,13 +11,13 @@ function isDesignMode(value: unknown): value is DesignMode {
 }
 
 function read(): DesignMode {
-  if (typeof window === 'undefined') return 'classic';
+  if (typeof window === 'undefined') return 'video';
   try {
     const raw = window.localStorage.getItem(DESIGN_MODE_KEY);
-    return isDesignMode(raw) ? raw : 'classic';
+    return isDesignMode(raw) ? raw : 'video';
   } catch {
     window.localStorage.removeItem(DESIGN_MODE_KEY);
-    return 'classic';
+    return 'video';
   }
 }
 

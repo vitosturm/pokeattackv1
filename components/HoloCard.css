@@ -129,19 +129,21 @@
   background-position: var(--background-x) var(--background-y);
 }
 
-/* The glare: a bright soft highlight tracking the pointer. */
+/* The glare: a soft highlight tracking the pointer. Kept subtle so it
+   doesn't blow out light-colored TCG card art (Bulbasaur green, Squirtle
+   blue, Jigglypuff pink) the way an aggressive overlay would. */
 .holo-card__glare {
   position: absolute;
   inset: 0;
   z-index: 4;
   border-radius: inherit;
   pointer-events: none;
-  opacity: calc(var(--card-opacity) * 0.7);
+  opacity: calc(var(--card-opacity) * 0.45);
   mix-blend-mode: overlay;
   background-image: radial-gradient(
     farthest-corner circle at var(--pointer-x) var(--pointer-y),
-    rgba(255, 255, 255, 0.8) 0%,
-    rgba(255, 255, 255, 0.2) 25%,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.1) 30%,
     rgba(0, 0, 0, 0) 60%
   );
 }
