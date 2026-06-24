@@ -104,7 +104,8 @@ function describeEvent(event: TurnEvent, playerName: string, oppName: string): s
 }
 
 export function battleReducer(state: BattleState, action: BattleAction): BattleState {
-  if (action.type !== 'START_NEXT_WAVE' && (state.over || state.waveCleared)) return state;
+  if (state.over) return state;
+  if (action.type !== 'START_NEXT_WAVE' && state.waveCleared) return state;
 
   if (action.type === 'PLAYER_SWITCH') {
     if (action.to < 0 || action.to >= state.player.team.length) return state;
