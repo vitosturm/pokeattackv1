@@ -136,6 +136,8 @@ describe('BattleArena', () => {
       />,
     );
     await userEvent.click(screen.getByRole('button', { name: /splash/i }));
-    expect(screen.getByText(/wave 1 cleared/i)).toBeInTheDocument();
+    expect(screen.getByTestId('wave-clear-banner')).toBeInTheDocument();
+    expect(screen.getByText('Wave 1 cleared!')).toBeInTheDocument();
+    expect(screen.getByText(/loading next opponents/i)).toBeInTheDocument();
   });
 });
