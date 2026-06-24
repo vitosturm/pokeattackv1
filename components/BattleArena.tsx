@@ -142,14 +142,14 @@ export function BattleArena({
   }
 
   useEffect(() => {
-    if (state.over && onOver && state.winner) {
-      onOver({
-        score: state.score,
-        wins: state.wins,
-        battles: state.battles,
-        winner: state.winner,
-      });
-    }
+    if (!state.over || !onOver || !state.winner) return;
+    // Delay long enough for the defeat/victory overlay's animation to play
+    // before the parent swaps this component out for the post-game screen —
+    // without this, onOver fires the same tick state.over flips true and the
+    // overlay is unmounted before it's ever visible.
+    const { winner, score, wins, battles } = state;
+    const t = setTimeout(() => onOver({ score, wins, battles, winner }), 1800);
+    return () => clearTimeout(t);
   }, [state.over, state.winner, state.score, state.wins, state.battles, onOver]);
 
   useEffect(() => {
