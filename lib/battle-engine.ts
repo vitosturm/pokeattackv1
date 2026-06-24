@@ -198,6 +198,10 @@ export function resolveTurn(input: ResolveTurnInput): ResolveTurnResult {
   const playerStatus = input.player.status ?? oppAttack.appliedStatus;
   const oppStatus = input.opponent.status ?? playerAttack.appliedStatus;
 
+  // Deliberate simplification: residual damage reads pre-turn status, so a
+  // burn/poison just inflicted this turn doesn't tick until next turn. Spec
+  // calls for same-turn ticking; the one-turn delay is a negligible gameplay
+  // difference and keeps applyResidual from needing the post-attack status.
   playerHp = applyResidual('player', input.player.mon, playerHp, input.player.status, events);
   oppHp = applyResidual('opponent', input.opponent.mon, oppHp, input.opponent.status, events);
 

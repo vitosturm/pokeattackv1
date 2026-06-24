@@ -1,16 +1,23 @@
 'use client';
 
+let sharedCtx: AudioContext | null | undefined;
+
 function getAudioContext(): AudioContext | null {
+  if (sharedCtx !== undefined) return sharedCtx;
   if (typeof window === 'undefined') return null;
   const Ctor =
     window.AudioContext ??
     (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-  if (!Ctor) return null;
-  try {
-    return new Ctor();
-  } catch {
+  if (!Ctor) {
+    sharedCtx = null;
     return null;
   }
+  try {
+    sharedCtx = new Ctor();
+  } catch {
+    sharedCtx = null;
+  }
+  return sharedCtx;
 }
 
 function playTone(
@@ -56,8 +63,5 @@ export function playStatusSound(status: 'paralysis' | 'burn' | 'poison'): void {
   if (!ctx) return;
   const freq = STATUS_FREQ[status];
   playTone(ctx, freq, freq, 90, 'triangle');
-  setTimeout(() => {
-    const ctx2 = getAudioContext();
-    if (ctx2) playTone(ctx2, freq, freq, 90, 'triangle');
-  }, 120);
+  setTimeout(() => playTone(ctx, freq, freq, 90, 'triangle'), 120);
 }

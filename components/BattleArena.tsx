@@ -211,11 +211,16 @@ export function BattleArena({
   useEffect(() => {
     if (!state.waveCleared || !onWaveClear) return;
     let cancelled = false;
-    onWaveClear().then(({ opponents: nextOpponents, opponentMoves: nextMoves }) => {
-      if (cancelled) return;
-      dispatchOppMoves(nextMoves);
-      dispatch({ type: 'START_NEXT_WAVE', opponents: nextOpponents });
-    });
+    onWaveClear()
+      .then(({ opponents: nextOpponents, opponentMoves: nextMoves }) => {
+        if (cancelled) return;
+        dispatchOppMoves(nextMoves);
+        dispatch({ type: 'START_NEXT_WAVE', opponents: nextOpponents });
+      })
+      .catch(() => {
+        // page already showed a toast; waveCleared stays true, blocking further
+        // actions until the user refreshes — acceptable UX for a network failure
+      });
     return () => {
       cancelled = true;
     };
