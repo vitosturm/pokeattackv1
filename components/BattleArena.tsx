@@ -206,7 +206,7 @@ export function BattleArena({
 
     const t = setTimeout(() => dispatchVis({ type: 'CLEAR_FX' }), 350);
     return () => clearTimeout(t);
-  }, [state.lastEvents, state.log, playCritSound, playFaintSound, playStatusSound]);
+  }, [state.lastEvents, state.log]);
 
   useEffect(() => {
     if (!state.waveCleared || !onWaveClear) return;
