@@ -1,4 +1,10 @@
-import { MoveSchema, PokemonSummarySchema, type Move, type PokemonSummary } from './types';
+import {
+  MoveSchema,
+  PokemonSummarySchema,
+  type Move,
+  type PokemonSummary,
+  type StatusCondition,
+} from './types';
 
 const BASE = 'https://pokeapi.co/api/v2';
 
@@ -74,11 +80,24 @@ interface RawMove {
   type: { name: string };
   power: number | null;
   pp: number;
+  accuracy: number | null;
   damage_class: { name: 'physical' | 'special' | 'status' };
+  meta?: {
+    ailment?: { name: string };
+    ailment_chance?: number;
+    crit_rate?: number;
+  };
 }
+
+const AILMENT_NAME_MAP: Record<string, StatusCondition> = {
+  paralysis: 'paralysis',
+  burn: 'burn',
+  poison: 'poison',
+};
 
 export async function getMove(idOrName: number | string): Promise<Move> {
   const raw = await getJson<RawMove>(`${BASE}/move/${idOrName}`);
+  const rawAilment = raw.meta?.ailment?.name;
   return MoveSchema.parse({
     id: raw.id,
     name: raw.name,
@@ -86,6 +105,10 @@ export async function getMove(idOrName: number | string): Promise<Move> {
     power: raw.power,
     pp: raw.pp,
     damageClass: raw.damage_class.name,
+    accuracy: raw.accuracy,
+    ailment: rawAilment ? (AILMENT_NAME_MAP[rawAilment] ?? null) : null,
+    ailmentChance: raw.meta?.ailment_chance ?? 0,
+    highCrit: (raw.meta?.crit_rate ?? 0) > 0,
   });
 }
 

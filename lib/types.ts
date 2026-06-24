@@ -3,6 +3,9 @@ import { TYPES } from './type-chart';
 
 export const TypeSchema = z.enum(TYPES);
 
+export const STATUS_CONDITIONS = ['paralysis', 'burn', 'poison'] as const;
+export type StatusCondition = (typeof STATUS_CONDITIONS)[number];
+
 export const StatsSchema = z.object({
   hp: z.number().int().nonnegative(),
   attack: z.number().int().nonnegative(),
@@ -32,6 +35,10 @@ export const MoveSchema = z.object({
     .transform((v) => v ?? 0),
   pp: z.number().int().nonnegative(),
   damageClass: z.enum(['physical', 'special', 'status']),
+  accuracy: z.number().int().min(1).max(100).nullable().optional(),
+  ailment: z.enum(STATUS_CONDITIONS).nullable().optional(),
+  ailmentChance: z.number().int().min(0).max(100).optional(),
+  highCrit: z.boolean().optional(),
 });
 export type Move = z.infer<typeof MoveSchema>;
 
