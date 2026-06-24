@@ -53,4 +53,32 @@ describe('BattleArena', () => {
     await userEvent.click(screen.getByRole('button', { name: /splash/i }));
     expect(screen.queryAllByText('100 / 100').length).toBeLessThan(initialOppHp.length);
   });
+
+  it('forces a Pokémon switch when the active Pokémon faints, hiding move buttons until one is chosen', async () => {
+    const fragileTeam = [{ ...team[0], stats: { ...team[0].stats, hp: 1 } }, team[1], team[2]];
+    render(
+      <BattleArena
+        team={fragileTeam}
+        opponents={opp}
+        playerMoves={playerMovesById}
+        opponentMoves={oppMovesById}
+      />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: /splash/i }));
+    expect(screen.queryByRole('button', { name: /splash/i })).not.toBeInTheDocument();
+    expect(screen.getByText(/fainted! choose your next/i)).toBeInTheDocument();
+  });
+
+  it('renders the battle log after a move is used', async () => {
+    render(
+      <BattleArena
+        team={team}
+        opponents={opp}
+        playerMoves={playerMovesById}
+        opponentMoves={oppMovesById}
+      />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: /splash/i }));
+    expect(screen.getByText(/used splash/i)).toBeInTheDocument();
+  });
 });

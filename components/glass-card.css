@@ -122,3 +122,51 @@
     animation: none;
   }
 }
+
+@keyframes battle-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+.battle-shake {
+  animation: battle-shake 0.35s ease-in-out;
+}
+
+@keyframes sprite-flash {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(2.2) saturate(0.3);
+  }
+}
+.sprite-flash {
+  animation: sprite-flash 0.18s ease-in-out;
+}
+
+@keyframes sprite-dodge {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(14px);
+  }
+}
+.sprite-dodge {
+  animation: sprite-dodge 0.25s ease-in-out;
+}
