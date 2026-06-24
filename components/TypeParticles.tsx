@@ -37,32 +37,64 @@ function pseudoRandom(seed: number): number {
   return x - Math.floor(x);
 }
 
-export function TypeParticles({ trigger, type }: { trigger: number; type: PokemonType }) {
+interface IntensityConfig {
+  count: number;
+  size: number;
+  spread: number;
+  opacity: number;
+  grey: boolean;
+}
+
+const INTENSITY: Record<'miss' | 'weak' | 'normal' | 'strong', IntensityConfig> = {
+  miss: { count: 6, size: 4, spread: 40, opacity: 0.5, grey: true },
+  weak: { count: 10, size: 5, spread: 60, opacity: 0.7, grey: false },
+  normal: { count: 18, size: 6, spread: 80, opacity: 0.9, grey: false },
+  strong: { count: 28, size: 8, spread: 100, opacity: 1, grey: false },
+};
+
+export function TypeParticles({
+  trigger,
+  type,
+  intensity = 'normal',
+}: {
+  trigger: number;
+  type: PokemonType;
+  intensity?: 'miss' | 'weak' | 'normal' | 'strong';
+}) {
   const [hiddenTrigger, setHiddenTrigger] = useState<number | null>(null);
   useEffect(() => {
     if (trigger === 0) return;
     const t = setTimeout(() => setHiddenTrigger(trigger), 700);
     return () => clearTimeout(t);
   }, [trigger]);
+
+  const cfg = INTENSITY[intensity];
+  const color = cfg.grey ? '#999' : (COLOR[type] ?? '#fff');
+
   const sparks: Spark[] =
     trigger === 0 || hiddenTrigger === trigger
       ? []
-      : Array.from({ length: 18 }, (_, i) => ({
+      : Array.from({ length: cfg.count }, (_, i) => ({
           id: trigger * 100 + i,
-          x: 50 + (pseudoRandom(trigger * 31 + i * 2) - 0.5) * 80,
-          y: 50 + (pseudoRandom(trigger * 31 + i * 2 + 1) - 0.5) * 80,
-          color: COLOR[type] ?? '#fff',
+          x: 50 + (pseudoRandom(trigger * 31 + i * 2) - 0.5) * cfg.spread,
+          y: 50 + (pseudoRandom(trigger * 31 + i * 2 + 1) - 0.5) * cfg.spread,
+          color,
         }));
+
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
       {sparks.map((s) => (
         <span
           key={s.id}
-          className="absolute h-1.5 w-1.5 rounded-full opacity-90"
+          data-testid="spark"
+          className="absolute rounded-full"
           style={{
             left: `${s.x}%`,
             top: `${s.y}%`,
+            width: cfg.size,
+            height: cfg.size,
             background: s.color,
+            opacity: cfg.opacity,
             boxShadow: `0 0 8px ${s.color}`,
           }}
         />
