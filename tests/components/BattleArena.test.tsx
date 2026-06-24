@@ -81,4 +81,61 @@ describe('BattleArena', () => {
     await userEvent.click(screen.getByRole('button', { name: /splash/i }));
     expect(screen.getByText(/used splash/i)).toBeInTheDocument();
   });
+
+  it('shows a status icon next to the opponent once they are burned', async () => {
+    const burnMove: Move = {
+      id: 3,
+      name: 'inferno',
+      type: 'fire',
+      power: 40,
+      pp: 10,
+      damageClass: 'special',
+      ailment: 'burn',
+      ailmentChance: 100,
+    };
+    const playerMovesWithBurn: Record<number, Move[]> = {
+      1: [...moves, burnMove],
+      2: [...moves, burnMove],
+      3: [...moves, burnMove],
+    };
+    render(
+      <BattleArena
+        team={team}
+        opponents={opp}
+        playerMoves={playerMovesWithBurn}
+        opponentMoves={oppMovesById}
+      />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: /inferno/i }));
+    expect(screen.getByText('🔥')).toBeInTheDocument();
+  });
+
+  it('shows a defeat overlay with the final score once the player team is wiped out', async () => {
+    const singleMon = [{ ...team[0], stats: { ...team[0].stats, hp: 1 } }];
+    render(
+      <BattleArena
+        team={singleMon}
+        opponents={opp}
+        playerMoves={playerMovesById}
+        opponentMoves={oppMovesById}
+      />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: /splash/i }));
+    expect(screen.getByText('DEFEATED')).toBeInTheDocument();
+    expect(screen.getByText(/Score:/)).toBeInTheDocument();
+  });
+
+  it('shows a wave-clear banner once all opponents are defeated', async () => {
+    const oneOpp = [{ ...opp[0], stats: { ...opp[0].stats, hp: 1 } }];
+    render(
+      <BattleArena
+        team={team}
+        opponents={oneOpp}
+        playerMoves={playerMovesById}
+        opponentMoves={oppMovesById}
+      />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: /splash/i }));
+    expect(screen.getByText(/wave 1 cleared/i)).toBeInTheDocument();
+  });
 });

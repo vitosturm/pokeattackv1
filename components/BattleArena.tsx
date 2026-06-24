@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useReducer } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { PokemonSummary, Move } from '@/lib/types';
 import { useBattle } from '@/hooks/useBattle';
 import { useSound } from '@/hooks/useSound';
@@ -11,6 +12,7 @@ import { HpBar } from './HpBar';
 import { MoveButton } from './MoveButton';
 import { TypeParticles } from './TypeParticles';
 import { BattleLog } from './BattleLog';
+import { StatusIcon } from './StatusIcon';
 import { Button } from '@/components/ui/button';
 import './glass-card.css';
 
@@ -244,7 +246,12 @@ export function BattleArena({
 
       <div className="glass-panel p-4 rounded-lg">
         <p className="text-xs text-white/60 mb-1">Opponent</p>
-        <h2 className="capitalize">{oppMon.name}</h2>
+        <div className="flex items-center justify-center gap-1.5">
+          <h2 className="capitalize">{oppMon.name}</h2>
+          {state.opponent.status[state.opponent.active] && (
+            <StatusIcon status={state.opponent.status[state.opponent.active]!} />
+          )}
+        </div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={oppMon.sprite}
@@ -265,7 +272,12 @@ export function BattleArena({
 
       <div className="glass-panel p-4 rounded-lg">
         <p className="text-xs text-white/60 mb-1">You · Wave {state.wave}</p>
-        <h2 className="capitalize">{playerMon.name}</h2>
+        <div className="flex items-center justify-center gap-1.5">
+          <h2 className="capitalize">{playerMon.name}</h2>
+          {state.player.status[state.player.active] && (
+            <StatusIcon status={state.player.status[state.player.active]!} />
+          )}
+        </div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={playerMon.sprite}
@@ -357,18 +369,53 @@ export function BattleArena({
         <BattleLog lines={state.log} />
       </div>
 
-      {state.waveCleared && (
-        <div className="md:col-span-2 text-center p-4 text-sm text-white/70">
-          Wave {state.wave} cleared! Loading next opponents…
-        </div>
-      )}
+      <AnimatePresence>
+        {state.waveCleared && (
+          <motion.div
+            initial={{ opacity: 0, y: -40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -40 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="md:col-span-2 mx-auto px-6 py-3 rounded-lg bg-green-500/20 border border-green-500/40 text-center"
+          >
+            <p className="text-sm font-semibold text-green-300">Wave {state.wave} cleared!</p>
+            <p className="text-xs text-white/60">Loading next opponents…</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {state.over && (
-        <div className="md:col-span-2 text-center p-4">
-          <p className="text-xl">{state.winner === 'player' ? 'Victory!' : 'Defeated.'}</p>
-          <p className="text-sm text-white/60">Score: {state.score}</p>
-        </div>
-      )}
+      <AnimatePresence>
+        {state.over && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="absolute inset-0 z-20 flex items-center justify-center bg-black/70 rounded-lg"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              className="text-center"
+            >
+              <p
+                className={`text-4xl font-bold ${state.winner === 'player' ? 'text-green-400' : 'text-red-400'}`}
+              >
+                {state.winner === 'player' ? 'VICTORY!' : 'DEFEATED'}
+              </p>
+              <motion.p
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.2 }}
+                className="text-sm text-white/70 mt-3"
+              >
+                Score: {state.score} · Wins: {state.wins} · Battles: {state.battles}
+              </motion.p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
