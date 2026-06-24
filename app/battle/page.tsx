@@ -8,11 +8,14 @@ import { useSound } from '@/hooks/useSound';
 import { cryUrl, getPokemonWithMoves, randomGen1Ids } from '@/lib/pokeapi';
 import type { Move, PokemonSummary } from '@/lib/types';
 import { BattleArena } from '@/components/BattleArena';
-import { PokemonCard } from '@/components/PokemonCard';
+import { HoloCard } from '@/components/HoloCard';
+import { TCG_CARD_IMAGE } from '@/lib/tcg-cards';
 import { submitScore } from '@/app/actions/leaderboard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { SiteNav } from '@/components/SiteNav';
+import { SectionTransition } from '@/components/SectionTransition';
+import Link from 'next/link';
 import '@/components/glass-card.css';
 
 type Phase = 'pick' | 'loading' | 'fight' | 'over';
@@ -41,8 +44,8 @@ export default function BattlePage() {
     battles: number;
     winner: 'player' | 'opponent';
   } | null>(null);
+  const [wave, setWave] = useState(1);
 
-  // When roster has exactly 3 and user hasn't touched the picker, pre-select all 3.
   const effectivePicked = useMemo(() => {
     if (!pickedTouched && roster.length === 3) {
       return new Set(roster.map((p) => p.id));
@@ -54,11 +57,41 @@ export default function BattlePage() {
     return (
       <>
         <SiteNav />
-        <main className="p-8 max-w-2xl mx-auto">
-          <p>You need at least 3 Pokémon in your roster.</p>
-          <Button className="mt-3" onClick={() => router.push('/pokedex')}>
-            Go pick some
-          </Button>
+        <div className="relative px-14 md:px-20 pt-14 pb-12 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-transparent pointer-events-none" />
+          <h1
+            className="relative text-6xl md:text-8xl leading-none"
+            style={{
+              fontFamily: 'Bangers, Impact, sans-serif',
+              letterSpacing: '0.04em',
+              textShadow: '2px 2px 0 #1a1a1a, 4px 4px 0 rgba(255,56,96,0.5)',
+            }}
+          >
+            BATTLE
+          </h1>
+        </div>
+        <main className="px-14 md:px-20 pb-24">
+          <SectionTransition>
+            <div className="glass-panel rounded-xl py-20 text-center max-w-lg mx-auto">
+              <p className="text-5xl mb-4" style={{ fontFamily: 'Bangers, Impact, sans-serif' }}>
+                Not enough Pokémon!
+              </p>
+              <p className="text-white/60 mb-8 text-sm">
+                You need at least 3 Pokémon in your roster to start a battle.
+              </p>
+              <Link
+                href="/pokedex"
+                className="inline-block bg-[#ff3860] hover:opacity-90 transition-opacity px-8 py-3 rounded-full font-bold"
+                style={{
+                  fontFamily: '"Press Start 2P", monospace',
+                  fontSize: '9px',
+                  letterSpacing: '0.1em',
+                }}
+              >
+                Go to Pokédex →
+              </Link>
+            </div>
+          </SectionTransition>
         </main>
       </>
     );
@@ -67,7 +100,6 @@ export default function BattlePage() {
   function togglePick(id: number) {
     setPickedTouched(true);
     setPicked((prev) => {
-      // Seed from the effective set on first touch
       const seed = !pickedTouched ? effectivePicked : prev;
       const next = new Set(seed);
       if (next.has(id)) {
@@ -104,6 +136,22 @@ export default function BattlePage() {
     } catch {
       toast.error("Couldn't load battle data. Try again.");
       setPhase('pick');
+    }
+  }
+
+  async function loadNextWave(): Promise<{
+    opponents: PokemonSummary[];
+    opponentMoves: Record<number, Move[]>;
+  }> {
+    try {
+      const ids = randomGen1Ids(3);
+      const oppLoaded = await Promise.all(ids.map((id) => getPokemonWithMoves(id)));
+      const opponentMoves: Record<number, Move[]> = {};
+      for (const { pokemon, moves } of oppLoaded) opponentMoves[pokemon.id] = moves;
+      return { opponents: oppLoaded.map((t) => t.pokemon), opponentMoves };
+    } catch {
+      toast.error("Couldn't load the next wave. Try refreshing.");
+      throw new Error('wave-load-failed');
     }
   }
 
@@ -144,8 +192,6 @@ export default function BattlePage() {
     setLastResult(result);
     setSaved(false);
     setPhase('over');
-    // Auto-save only if a name was already entered before the battle ended.
-    // Otherwise the over-screen shows a name field + Save button.
     if (name.trim()) {
       await saveScore(result);
     }
@@ -157,31 +203,63 @@ export default function BattlePage() {
     setBundle(null);
     setLastResult(null);
     setSaved(false);
+    setWave(1);
     setPhase('pick');
   }
 
   return (
     <>
       <SiteNav />
-      <main className="max-w-5xl mx-auto p-6">
-        <header className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold">Battle</h1>
-          <Input
-            placeholder="Your name (for leaderboard)"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            maxLength={24}
-            className="max-w-[260px]"
-            disabled={busy}
-          />
-        </header>
 
-        {phase === 'pick' && (
-          <section>
-            <p className="mb-4 text-white/70">
-              Choose 3 starters from your roster ({effectivePicked.size}/3 selected):
+      {/* Hero — dynamic title per phase */}
+      <div className="relative px-14 md:px-20 pt-14 pb-10 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-transparent pointer-events-none" />
+        <div className="relative flex items-end justify-between gap-6 flex-wrap">
+          <div>
+            <h1
+              className="text-6xl md:text-8xl leading-none"
+              style={{
+                fontFamily: 'Bangers, Impact, sans-serif',
+                letterSpacing: '0.04em',
+                textShadow: '2px 2px 0 #1a1a1a, 4px 4px 0 rgba(255,56,96,0.5)',
+              }}
+            >
+              {phase === 'over'
+                ? lastResult?.winner === 'player'
+                  ? 'VICTORY!'
+                  : 'DEFEATED'
+                : 'BATTLE'}
+            </h1>
+            <p className="mt-3 text-sm text-white/60">
+              {phase === 'pick' && `Choose 3 from your roster — ${effectivePicked.size}/3 selected`}
+              {phase === 'loading' && 'Summoning opponents…'}
+              {phase === 'fight' && `Wave ${wave} — fight to the finish!`}
+              {phase === 'over' &&
+                lastResult &&
+                `Score: ${lastResult.score} · Wins: ${lastResult.wins} · Battles: ${lastResult.battles}`}
             </p>
-            <div className="grid gap-4 grid-cols-2 md:grid-cols-3">
+          </div>
+          {/* Name input — visible during pick & fight */}
+          {(phase === 'pick' || phase === 'fight') && (
+            <div className="flex-shrink-0">
+              <Input
+                placeholder="Your name (for leaderboard)"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                maxLength={24}
+                className="w-[260px] bg-white/5 border-white/20"
+                disabled={busy}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
+      <main className="px-14 md:px-20 pb-24">
+        {/* ── Pick phase ── */}
+        {phase === 'pick' && (
+          <SectionTransition>
+            <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 mb-10">
               {roster.map((p) => {
                 const on = effectivePicked.has(p.id);
                 return (
@@ -193,32 +271,62 @@ export default function BattlePage() {
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') togglePick(p.id);
                     }}
-                    className={`relative cursor-pointer transition ${
-                      on ? 'ring-2 ring-[#ff3860] rounded-lg' : 'opacity-80 hover:opacity-100'
+                    className={`relative cursor-pointer transition-all ${
+                      on
+                        ? 'ring-2 ring-[#ff3860] ring-offset-2 ring-offset-transparent rounded-xl scale-[1.02]'
+                        : 'opacity-70 hover:opacity-100'
                     }`}
                   >
-                    <PokemonCard pokemon={p} />
+                    <HoloCard pokemon={p} imageSrc={p.sprite} tcgImageUrl={TCG_CARD_IMAGE[p.id]} />
                     {on && (
-                      <span className="absolute top-2 right-2 bg-[#ff3860] text-white text-xs px-2 py-0.5 rounded-full">
-                        Picked
+                      <span
+                        className="absolute top-2 left-2 bg-[#ff3860] text-white text-[10px] px-2 py-0.5 rounded-full z-10"
+                        style={{ fontFamily: '"Press Start 2P", monospace' }}
+                      >
+                        ✓
                       </span>
                     )}
                   </div>
                 );
               })}
             </div>
-            <div className="mt-6 flex justify-end">
-              <Button onClick={startBattle} disabled={effectivePicked.size !== 3}>
+
+            <div className="flex justify-end">
+              <Button
+                onClick={startBattle}
+                disabled={effectivePicked.size !== 3}
+                className="bg-[#ff3860] hover:bg-[#e02850] text-white px-10 py-3 rounded-full"
+                style={{
+                  fontFamily: '"Press Start 2P", monospace',
+                  fontSize: '9px',
+                  letterSpacing: '0.12em',
+                }}
+              >
                 Start battle →
               </Button>
             </div>
-          </section>
+          </SectionTransition>
         )}
 
+        {/* ── Loading phase ── */}
         {phase === 'loading' && (
-          <p className="text-center text-white/70 py-12">Summoning opponents…</p>
+          <div className="flex flex-col items-center justify-center py-32 gap-6">
+            <div
+              className="text-5xl animate-bounce"
+              style={{ fontFamily: 'Bangers, Impact, sans-serif', color: '#ff3860' }}
+            >
+              ⚔
+            </div>
+            <p
+              className="text-white/60 text-sm"
+              style={{ fontFamily: '"Press Start 2P", monospace' }}
+            >
+              Summoning opponents…
+            </p>
+          </div>
         )}
 
+        {/* ── Fight phase ── */}
         {phase === 'fight' && bundle && (
           <BattleArena
             team={bundle.team}
@@ -226,64 +334,103 @@ export default function BattlePage() {
             playerMoves={bundle.playerMoves}
             opponentMoves={bundle.oppMoves}
             onOver={onOver}
+            onWaveClear={loadNextWave}
+            onWaveChange={setWave}
           />
         )}
 
+        {/* ── Over phase ── */}
         {phase === 'over' && lastResult && (
-          <section className="grid gap-6 md:grid-cols-2">
-            <div className="text-center md:col-span-2 p-4">
-              <p className="text-3xl font-bold">
-                {lastResult.winner === 'player' ? 'Victory!' : 'Defeated.'}
-              </p>
-              <p className="text-sm text-white/60 mt-2">
-                Score: {lastResult.score} · Wins: {lastResult.wins} · Battles: {lastResult.battles}
-              </p>
-            </div>
-
-            {/* Save-to-leaderboard panel. Shown until the score is saved so the
-                player can always enter a name and submit, even if they didn't
-                type one before the battle ended. */}
-            {!saved ? (
-              <div className="glass-panel rounded-lg p-5 md:col-span-2 max-w-md mx-auto w-full">
-                <p className="text-sm text-white/70 mb-3 text-center">
-                  Enter a name to save your score to the leaderboard.
-                </p>
-                <form
-                  className="flex gap-2"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    void saveScore(lastResult);
-                  }}
-                >
-                  <Input
-                    placeholder="Your name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    maxLength={24}
-                    disabled={busy}
-                    autoFocus
-                  />
-                  <Button type="submit" disabled={busy || !name.trim()}>
-                    {busy ? 'Saving…' : 'Save score'}
-                  </Button>
-                </form>
+          <SectionTransition>
+            <div className="flex flex-col items-center gap-8 max-w-lg mx-auto">
+              {/* Stats card */}
+              <div className="glass-panel rounded-xl p-8 w-full text-center">
+                <div className="grid grid-cols-3 gap-4">
+                  {[
+                    { label: 'Score', value: lastResult.score, big: true },
+                    { label: 'Wins', value: lastResult.wins, big: false },
+                    { label: 'Battles', value: lastResult.battles, big: false },
+                  ].map(({ label, value, big }) => (
+                    <div key={label}>
+                      <div
+                        className={big ? 'text-5xl text-[#ff3860]' : 'text-3xl text-white'}
+                        style={{ fontFamily: 'Bangers, Impact, sans-serif' }}
+                      >
+                        {value}
+                      </div>
+                      <div
+                        className="text-[10px] text-white/50 uppercase tracking-widest mt-1"
+                        style={{ fontFamily: '"Press Start 2P", monospace' }}
+                      >
+                        {label}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ) : (
-              <p className="md:col-span-2 text-center text-green-400 text-sm">
-                ✓ Score saved to the leaderboard.
-              </p>
-            )}
 
-            <div className="md:col-span-2 flex justify-center gap-3">
-              <Button onClick={rematch}>Rematch</Button>
-              <Button variant="ghost" onClick={() => router.push('/leaderboard')}>
-                Leaderboard
-              </Button>
-              <Button variant="ghost" onClick={() => router.push('/')}>
-                Home
-              </Button>
+              {/* Save score */}
+              {!saved ? (
+                <div className="glass-panel rounded-xl p-6 w-full">
+                  <p className="text-sm text-white/60 mb-4 text-center">
+                    Enter a name to save your score to the leaderboard.
+                  </p>
+                  <form
+                    className="flex gap-2"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      void saveScore(lastResult);
+                    }}
+                  >
+                    <Input
+                      placeholder="Your trainer name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      maxLength={24}
+                      disabled={busy}
+                      autoFocus
+                      className="bg-white/5 border-white/20"
+                    />
+                    <Button
+                      type="submit"
+                      disabled={busy || !name.trim()}
+                      className="bg-[#ff3860] hover:bg-[#e02850] text-white shrink-0"
+                    >
+                      {busy ? 'Saving…' : 'Save'}
+                    </Button>
+                  </form>
+                </div>
+              ) : (
+                <p className="text-green-400 text-sm text-center">
+                  ✓ Score saved to the leaderboard.
+                </p>
+              )}
+
+              {/* Action buttons */}
+              <div className="flex gap-3">
+                <Button
+                  onClick={rematch}
+                  className="bg-[#ff3860] hover:bg-[#e02850] text-white px-8"
+                >
+                  Rematch
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push('/leaderboard')}
+                  className="border border-white/20 hover:bg-white/10"
+                >
+                  Leaderboard
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push('/')}
+                  className="border border-white/20 hover:bg-white/10"
+                >
+                  Home
+                </Button>
+              </div>
             </div>
-          </section>
+          </SectionTransition>
         )}
       </main>
     </>
