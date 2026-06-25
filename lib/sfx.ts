@@ -1,5 +1,7 @@
 'use client';
 
+import { isMuted } from '@/lib/muteState';
+
 let sharedCtx: AudioContext | null | undefined;
 
 function getAudioContext(): AudioContext | null {
@@ -41,12 +43,14 @@ function playTone(
 }
 
 export function playCritSound(): void {
+  if (isMuted()) return;
   const ctx = getAudioContext();
   if (!ctx) return;
   playTone(ctx, 440, 880, 150, 'square');
 }
 
 export function playFaintSound(): void {
+  if (isMuted()) return;
   const ctx = getAudioContext();
   if (!ctx) return;
   playTone(ctx, 600, 150, 400, 'sawtooth');
@@ -59,6 +63,7 @@ const STATUS_FREQ: Record<'paralysis' | 'burn' | 'poison', number> = {
 };
 
 export function playStatusSound(status: 'paralysis' | 'burn' | 'poison'): void {
+  if (isMuted()) return;
   const ctx = getAudioContext();
   if (!ctx) return;
   const freq = STATUS_FREQ[status];
