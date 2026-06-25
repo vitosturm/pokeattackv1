@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useRef } from 'react';
+import { isMuted } from '@/lib/muteState';
 
 export function useSound(src?: string, volume = 0.4) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -9,6 +10,7 @@ export function useSound(src?: string, volume = 0.4) {
   const play = useCallback(
     (overrideSrc?: string) => {
       if (typeof window === 'undefined') return;
+      if (isMuted()) return;
       const url = overrideSrc ?? src;
       if (!url) return;
       if (!audioRef.current || lastSrcRef.current !== url) {
