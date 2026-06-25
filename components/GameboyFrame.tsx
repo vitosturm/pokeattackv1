@@ -40,7 +40,7 @@ export function GameboyFrame({ children }: Props) {
         <div className="gb-meta__button-group">
           <button
             type="button"
-            className="gb-meta__pill gb-meta__mute-btn"
+            className={`gb-meta__mute-btn ${muted ? 'gb-meta__mute-btn--muted' : ''}`}
             onClick={toggleMuted}
             aria-label={muted ? 'Unmute' : 'Mute'}
           />
