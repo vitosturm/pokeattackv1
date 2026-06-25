@@ -8,6 +8,7 @@ import { useSound } from '@/hooks/useSound';
 import { cryUrl, getPokemonWithMoves, randomGen1Ids } from '@/lib/pokeapi';
 import type { Move, PokemonSummary } from '@/lib/types';
 import { BattleArena } from '@/components/BattleArena';
+import { GameboyFrame } from '@/components/GameboyFrame';
 import { HoloCard } from '@/components/HoloCard';
 import { TCG_CARD_IMAGE } from '@/lib/tcg-cards';
 import { submitScore } from '@/app/actions/leaderboard';
@@ -328,15 +329,17 @@ export default function BattlePage() {
 
         {/* ── Fight phase ── */}
         {phase === 'fight' && bundle && (
-          <BattleArena
-            team={bundle.team}
-            opponents={bundle.opponents}
-            playerMoves={bundle.playerMoves}
-            opponentMoves={bundle.oppMoves}
-            onOver={onOver}
-            onWaveClear={loadNextWave}
-            onWaveChange={setWave}
-          />
+          <GameboyFrame>
+            <BattleArena
+              team={bundle.team}
+              opponents={bundle.opponents}
+              playerMoves={bundle.playerMoves}
+              opponentMoves={bundle.oppMoves}
+              onOver={onOver}
+              onWaveClear={loadNextWave}
+              onWaveChange={setWave}
+            />
+          </GameboyFrame>
         )}
 
         {/* ── Over phase ── */}
